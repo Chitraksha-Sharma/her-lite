@@ -10,7 +10,9 @@ import {
   Activity,
   Settings,
   LogOut,
-  Heart
+  Heart,
+  UserCog,
+  UserRoundCog
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,6 +27,9 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
+import { useAuth } from "../../api/context/AuthContext";
+
+
 const navigationItems = [
   { title: "Dashboard", url: "/dashboard", icon: Activity },
   { title: "Patient Registration", url: "/patient-registration", icon: UserPlus },
@@ -34,6 +39,7 @@ const navigationItems = [
   { title: "Laboratory", url: "/laboratory", icon: TestTube },
   { title: "Pharmacy", url: "/pharmacy", icon: Pill },
   { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Admin", url: "/admin", icon: UserRoundCog },
 ];
 
 export function AppSidebar() {
@@ -41,14 +47,20 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
+  const { logout } = useAuth();
+
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-primary/10 text-primary font-medium " : "hover:bg-muted/50";
 
-  const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    try {
+      await logout();
+      window.location.href = "/login"; // force redirect to login
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
   };
 
   return (

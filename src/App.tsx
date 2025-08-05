@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import MainLayout from "./components/layout/MainLayout";
 import LocationSector from "./pages/Location";
+import { AuthProvider } from "./api/context/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <AuthProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
@@ -93,6 +95,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
