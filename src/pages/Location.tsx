@@ -6,6 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertCircle, MapPin, Loader2 } from "lucide-react";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 import { getLocations, Location } from "@/api/location";
+import {getUser} from "@/api/user";
+import { getProvider } from "@/api/provider";
+import { useAuth } from "@/api/context/AuthContext";
 
 const LocationSector = () => {
   const [location, setLocation] = useState("");
@@ -48,6 +51,7 @@ const LocationSector = () => {
     fetchLocations();
   }, [navigate]);
 
+  const { session } = useAuth();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -69,6 +73,22 @@ const LocationSector = () => {
           uuid: selectedLocation.uuid,
           display: selectedLocation.display
         }));
+
+      //fetch user info
+      if (!session?.user?.uuid) {
+        throw new Error("No user UUID found in session");
+      }
+      const userData = await getUser(session.user.uuid);
+
+      //fetch provider info
+      if (!userData?.person?.uuid) {
+        throw new Error("No person UUID found in user data");
+      }
+      const providerData = await getProvider(userData.person.uuid); 
+
+      // store both user and provider
+      localStorage.setItem("currentUser", JSON.stringify(userData));
+      localStorage.setItem("currentProvider", JSON.stringify(providerData));
 
         toast({
           title: 'Location selected',
