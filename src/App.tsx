@@ -17,6 +17,7 @@ import ProtectedRoute from "./components/layout/ProtectedRoute";
 import MainLayout from "./components/layout/MainLayout";
 import LocationSector from "./pages/Location";
 import { AuthProvider } from "./api/context/AuthContext";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,13 @@ const App = () => (
             <ProtectedRoute>
               <MainLayout>
                 <PatientDetail />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/Admin" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Admin />
               </MainLayout>
             </ProtectedRoute>
           } />
