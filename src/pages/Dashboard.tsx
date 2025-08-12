@@ -1,7 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
 import { 
   Users, 
   Calendar, 
@@ -12,7 +11,7 @@ import {
   Clock,
   Activity
 } from "lucide-react";
-import { Navigate } from "react-router-dom";
+import ScheduleAppointmentModal from "@/components/ScheduleAppointmentModal";
 
 const Dashboard = () => {
   const stats = [
@@ -48,10 +47,6 @@ const Dashboard = () => {
     { message: "Medication allergy alert for Sarah Wilson", severity: "medium" },
     { message: "Appointment reminder system down", severity: "low" },
   ];
-  const navigate = useNavigate();
-  const handleClick = () =>{
-    navigate("/schedule-appointment");
-  }
 
   return (
     <div className="p-6 space-y-6 bg-background min-h-screen">
@@ -60,10 +55,12 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold text-primary">Dashboard</h1>
           <p className="text-muted-foreground">Welcome back! Here's your medical center overview.</p>
         </div>
-        <Button variant="animated" className="bg-primary hover:bg-primary/90" onClick={handleClick}>
-          <Calendar className="mr-2 h-4 w-4" />
-          Schedule Appointment
-        </Button>
+        <ScheduleAppointmentModal>
+          <Button variant="animated" className="bg-primary hover:bg-primary/90">
+            <Calendar className="mr-2 h-4 w-4" />
+            Schedule Appointment
+          </Button>
+        </ScheduleAppointmentModal>
       </div>
 
       {/* Statistics Cards */}
@@ -99,10 +96,12 @@ const Dashboard = () => {
               <Users className="h-6 w-6" />
               Register Patient
             </Button>
-            <Button variant="outline" className="text-primary hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5">
-              <Calendar className="h-6 w-6" />
-              Schedule Visit
-            </Button>
+            <ScheduleAppointmentModal>
+              <Button variant="outline" className="text-primary hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5 w-full">
+                <Calendar className="h-6 w-6" />
+                Schedule Visit
+              </Button>
+            </ScheduleAppointmentModal>
             <Button variant="outline" className="text-primary hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5">
               <TestTube className="h-6 w-6" />
               Lab Orders
