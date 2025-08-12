@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState } from 'react';
-import { Button } from 'react-day-picker';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,7 +17,7 @@ const ScheduleAppointment = () => {
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
-        dateOfBirth: undefined as Date | undefined,
+        dateOfBirth: "",
         gender: "",
         phone: "",
         email: "",
@@ -39,11 +39,10 @@ const ScheduleAppointment = () => {
 
    
   return (
-    <div>
-        
+    <div className="p-6 max-w-4xl mx-auto bg-white rounded-xl shadow-md">
+        <h2 className="text-2xl font-semibold mb-6">Schedule Appointment</h2>
 
-        <form onSubmit={handleSubmit}>     
-        <div className="grid gap-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-6 md:grid-cols-3">
                 <div className="space-y-2">
                     <Label htmlFor="firstName">First Name *</Label>
@@ -66,23 +65,30 @@ const ScheduleAppointment = () => {
                     />
                 </div>
                 <div className="space-y-2">
-                <Label>Date of Birth *</Label>
-                </div>
-                <div className="space-y-2">
-                    <Label>Gender *</Label>
-                    <Select onValueChange={(value) => handleInputChange("gender", value)}>
-                        <SelectTrigger>
-                        <SelectValue placeholder="Select gender" />
-                        </SelectTrigger>
-                        <SelectContent>
-                        <SelectItem value="male">Male</SelectItem>
-                        <SelectItem value="female">Female</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <Label>Date of Birth *</Label>
+                    <Input
+                    id="dob"
+                    type="date"
+                    value={formData.dateOfBirth}
+                    onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                    required
+                    />
                 </div>
             </div>
-            <div>
+            <div className="space-y-2">
+                <Label>Gender *</Label>
+                <Select onValueChange={(value) => handleInputChange("gender", value)}>
+                    <SelectTrigger>
+                    <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number *</Label>
                     <Input
@@ -103,16 +109,18 @@ const ScheduleAppointment = () => {
                     placeholder="Enter email address"
                     />
                 </div>
-                <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="address">Address</Label>
-                    <Textarea
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => handleInputChange("address", e.target.value)}
-                    placeholder="Enter full address"
-                    className="min-h-[80px]"
-                    />
-                </div>
+            </div>
+            <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="address">Address</Label>
+                <Textarea
+                id="address"
+                value={formData.address}
+                onChange={(e) => handleInputChange("address", e.target.value)}
+                placeholder="Enter full address"
+                className="min-h-[80px]"
+                />
+            </div>
+            <div className="space-y-2 md:col-span-2">
                 <div className="space-y-2">
                     <Label htmlFor="emergencyContact">Emergency Contact Name</Label>
                     <Input
@@ -132,9 +140,8 @@ const ScheduleAppointment = () => {
                     />
                 </div>
             </div>
-        </div>
           {/* Action Buttons */}
-        <div className="flex gap-4 justify-end">
+        <div className="flex justify-end">
             <Button type="submit" className="bg-primary hover:bg-primary/90">
                 <Save className="mr-2 h-4 w-4" />
                 Register Patient
