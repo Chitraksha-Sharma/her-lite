@@ -18,6 +18,7 @@ import {
   Calendar as CalendarDays
 } from "lucide-react";
 import { format } from "date-fns";
+import ScheduleAppointmentModal from "@/components/ScheduleAppointmentModal";
 
 const Appointments = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -172,10 +173,12 @@ const Appointments = () => {
                 <CardTitle>Appointment Schedule</CardTitle>
                 <CardDescription>View and manage all appointments</CardDescription>
               </div>
-              <Button className="bg-primary hover:bg-primary/90">
+              <ScheduleAppointmentModal>
+                <Button className="bg-primary hover:bg-primary/90">
                 <Plus className="mr-2 h-4 w-4" />
-                New Appointment
-              </Button>
+                  New Appointment
+                </Button>
+              </ScheduleAppointmentModal>
             </div>
           </CardHeader>
           <CardContent>

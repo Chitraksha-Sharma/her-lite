@@ -32,8 +32,8 @@ interface AdminTileData {
   status?: 'active' | 'inactive' | 'pending';
   color?: string;
   actions?: {
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
     onClick: () => void;
   }[];
 }
@@ -126,167 +126,73 @@ const Admin: React.FC = () => {
       title: 'Users',
       description: 'Manage system users and permissions',
       icon: Users,
-      count: 45,
-      status: 'active',
-      color: 'bg-blue-500',
-      actions: [
-        { label: 'View', icon: Eye, onClick: () => console.log('View users') },
-        { label: 'Add', icon: Plus, onClick: () => console.log('Add user') },
-        { label: 'Edit', icon: Edit, onClick: () => console.log('Edit users') }
-      ]
     },
     {
       id: 'patients',
       title: 'Patients',
       description: 'Patient records and information',
       icon: UserCheck,
-      count: 1247,
-      status: 'active',
-      color: 'bg-green-500',
-      actions: [
-        { label: 'View', icon: Eye, onClick: () => console.log('View patients') },
-        { label: 'Add', icon: Plus, onClick: () => console.log('Add patient') },
-        { label: 'Edit', icon: Edit, onClick: () => console.log('Edit patients') }
-      ]
     },
     {
       id: 'person',
       title: 'Person',
       description: 'Personnel and staff management',
       icon: UserPlus,
-      count: 89,
-      status: 'active',
-      color: 'bg-purple-500',
-      actions: [
-        { label: 'View', icon: Eye, onClick: () => console.log('View personnel') },
-        { label: 'Add', icon: Plus, onClick: () => console.log('Add person') },
-        { label: 'Edit', icon: Edit, onClick: () => console.log('Edit personnel') }
-      ]
     },
     {
       id: 'visits',
       title: 'Visits',
       description: 'Patient visit tracking and history',
       icon: Calendar,
-      count: 342,
-      status: 'active',
-      color: 'bg-orange-500',
-      actions: [
-        { label: 'View', icon: Eye, onClick: () => console.log('View visits') },
-        { label: 'Add', icon: Plus, onClick: () => console.log('Add visit') },
-        { label: 'Edit', icon: Edit, onClick: () => console.log('Edit visits') }
-      ]
     },
     {
       id: 'encounters',
       title: 'Encounters',
       description: 'Clinical encounters and interactions',
       icon: Stethoscope,
-      count: 156,
-      status: 'active',
-      color: 'bg-red-500',
-      actions: [
-        { label: 'View', icon: Eye, onClick: () => console.log('View encounters') },
-        { label: 'Add', icon: Plus, onClick: () => console.log('Add encounter') },
-        { label: 'Edit', icon: Edit, onClick: () => console.log('Edit encounters') }
-      ]
     },
     {
       id: 'providers',
       title: 'Providers',
       description: 'Healthcare provider management',
       icon: Shield,
-      count: 23,
-      status: 'active',
-      color: 'bg-indigo-500',
-      actions: [
-        { label: 'View', icon: Eye, onClick: () => console.log('View providers') },
-        { label: 'Add', icon: Plus, onClick: () => console.log('Add provider') },
-        { label: 'Edit', icon: Edit, onClick: () => console.log('Edit providers') }
-      ]
     },
     {
       id: 'locations',
       title: 'Locations',
       description: 'Facility and location management',
       icon: MapPin,
-      count: 12,
-      status: 'active',
-      color: 'bg-teal-500',
-      actions: [
-        { label: 'View', icon: Eye, onClick: () => console.log('View locations') },
-        { label: 'Add', icon: Plus, onClick: () => console.log('Add location') },
-        { label: 'Edit', icon: Edit, onClick: () => console.log('Edit locations') }
-      ]
     },
     {
       id: 'observations',
       title: 'Observations',
       description: 'Clinical observations and findings',
       icon: Activity,
-      count: 892,
-      status: 'active',
-      color: 'bg-pink-500',
-      actions: [
-        { label: 'View', icon: Eye, onClick: () => console.log('View observations') },
-        { label: 'Add', icon: Plus, onClick: () => console.log('Add observation') },
-        { label: 'Edit', icon: Edit, onClick: () => console.log('Edit observations') }
-      ]
     },
     {
       id: 'scheduler',
       title: 'Scheduler',
       description: 'Appointment and scheduling system',
       icon: Clock,
-      count: 67,
-      status: 'active',
-      color: 'bg-cyan-500',
-      actions: [
-        { label: 'View', icon: Eye, onClick: () => console.log('View scheduler') },
-        { label: 'Add', icon: Plus, onClick: () => console.log('Add schedule') },
-        { label: 'Edit', icon: Edit, onClick: () => console.log('Edit schedules') }
-      ]
     },
     {
       id: 'programs',
       title: 'Programs',
       description: 'Healthcare programs and initiatives',
       icon: FileText,
-      count: 8,
-      status: 'active',
-      color: 'bg-amber-500',
-      actions: [
-        { label: 'View', icon: Eye, onClick: () => console.log('View programs') },
-        { label: 'Add', icon: Plus, onClick: () => console.log('Add program') },
-        { label: 'Edit', icon: Edit, onClick: () => console.log('Edit programs') }
-      ]
     },
     {
       id: 'id-generation',
       title: 'ID Generation',
       description: 'Patient and entity ID management',
       icon: Database,
-      count: 0,
-      status: 'active',
-      color: 'bg-slate-500',
-      actions: [
-        { label: 'View', icon: Eye, onClick: () => console.log('View ID generation') },
-        { label: 'Add', icon: Plus, onClick: () => console.log('Generate ID') },
-        { label: 'Edit', icon: Edit, onClick: () => console.log('Edit ID settings') }
-      ]
+      
     },
     {
       id: 'system-settings',
       title: 'System Settings',
       description: 'System configuration and preferences',
       icon: Settings,
-      count: 0,
-      status: 'active',
-      color: 'bg-gray-500',
-      actions: [
-        { label: 'View', icon: Eye, onClick: () => console.log('View settings') },
-        { label: 'Edit', icon: Edit, onClick: () => console.log('Edit settings') }
-      ]
     }
   ];
 
@@ -314,57 +220,6 @@ const Admin: React.FC = () => {
         </div>
       </div>
 
-      {/* Statistics Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-primary/20">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Total Users</p>
-                <p className="text-2xl font-bold text-primary">45</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-primary/20">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <UserCheck className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Total Patients</p>
-                <p className="text-2xl font-bold text-primary">1,247</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-primary/20">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Active Visits</p>
-                <p className="text-2xl font-bold text-primary">342</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-primary/20">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Shield className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Providers</p>
-                <p className="text-2xl font-bold text-primary">23</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Admin Tiles Grid */}
       <div>
         <h2 className="text-xl font-semibold text-primary mb-4">System Management</h2>
@@ -378,34 +233,6 @@ const Admin: React.FC = () => {
           ))}
         </div>
       </div>
-
-      {/* Quick Actions */}
-      <Card className="border-primary/20">
-        <CardHeader>
-          <CardTitle className="text-primary">Quick Actions</CardTitle>
-          <CardDescription>Common administrative tasks</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="text-primary hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5">
-              <Users className="h-6 w-6" />
-              Add User
-            </Button>
-            <Button variant="outline" className="text-primary hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5">
-              <UserCheck className="h-6 w-6" />
-              Register Patient
-            </Button>
-            <Button variant="outline" className="text-primary hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5">
-              <Shield className="h-6 w-6" />
-              Add Provider
-            </Button>
-            <Button variant="outline" className="text-primary hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5">
-              <Settings className="h-6 w-6" />
-              System Settings
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

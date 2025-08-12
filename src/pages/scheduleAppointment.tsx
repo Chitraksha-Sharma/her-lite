@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from '@/components/ui/textarea';
 import { Save } from 'lucide-react';
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
 // import { Textarea } from '@/components/ui/textarea';
 // import { Calendar } from "@/components/ui/calendar";
 // import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +19,7 @@ const ScheduleAppointment = () => {
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
-        dateOfBirth: "",
+        dateOfBirth: undefined as Date | undefined,
         gender: "",
         phone: "",
         email: "",
@@ -66,13 +68,20 @@ const ScheduleAppointment = () => {
                 </div>
                 <div className="space-y-2">
                     <Label>Date of Birth *</Label>
-                    <Input
+                    {/* <Input
                     id="dob"
                     type="date"
                     value={formData.dateOfBirth}
                     onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                     required
-                    />
+                    /> */}
+                    <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.dateOfBirth ? format(formData.dateOfBirth, "PPP") : "Pick a date"}
+                        </Button>
                 </div>
             </div>
             <div className="space-y-2">
