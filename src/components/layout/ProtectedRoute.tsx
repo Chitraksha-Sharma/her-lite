@@ -1,19 +1,43 @@
 // src/components/layout/ProtectedRoute.tsx
-import React from "react";
-import { Navigate } from "react-router-dom";
-import { useAuth } from "@/api/context/AuthContext";
+import React from 'react';
+import { useAuth } from '@/api/context/AuthContext';
+import { UserRole } from '@/api/context/AuthContext';
+import AccessDenied from './AccessDenied';
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { session, loading } = useAuth();
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  allowedRoles?: UserRole[]; // Make it optional for backward compatibility
+  fallback?: React.ReactNode;
+}
 
-  if (loading) {
-    return <div className="p-6 text-muted-foreground">Loading session...</div>;
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children, 
+  allowedRoles, 
+  fallback = <AccessDenied /> 
+}) => {
+  const { user, hasRole, isLoading } = useAuth();
+  
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
-
-  if (!session?.authenticated) {
-    return <Navigate to="/login" replace />;
+  
+  // If no user is authenticated, show access denied
+  if (!user) {
+    return <>{fallback}</>;
   }
-
+  
+  // If allowedRoles is specified, check role permissions
+  if (allowedRoles && allowedRoles.length > 0) {
+    if (!hasRole(allowedRoles)) {
+      return <>{fallback}</>;
+    }
+  }
+  
   return <>{children}</>;
 };
 

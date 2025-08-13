@@ -39,15 +39,17 @@ const navigationItems = [
   { title: "Laboratory", url: "/laboratory", icon: TestTube },
   { title: "Pharmacy", url: "/pharmacy", icon: Pill },
   { title: "Settings", url: "/settings", icon: Settings },
-  { title: "Admin", url: "/admin", icon: UserRoundCog },
 ];
+
+// Admin navigation item (will be conditionally added)
+const adminItem = { title: "Admin", url: "/admin", icon: UserRoundCog };
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
-  const { logout } = useAuth();
+  const { logout, isSystemDeveloperOrAdmin } = useAuth();
 
 
   const isActive = (path: string) => currentPath === path;
@@ -102,6 +104,22 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              
+              {/* Conditionally show Admin link */}
+              {isSystemDeveloperOrAdmin() && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to={adminItem.url} 
+                      className={getNavCls}
+                      title={collapsed ? adminItem.title : undefined}
+                    >
+                      <adminItem.icon className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span className="ml-3">{adminItem.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
