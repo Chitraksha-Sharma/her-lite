@@ -142,9 +142,12 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({ chi
               <Label htmlFor="phone">Phone Number *</Label>
               <Input
                 id="phone"
+                type='tel'
                 value={formData.phone}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
                 placeholder="Enter phone number"
+                maxLength={10}
+                pattern='[0-9]{10}'
                 required
               />
             </div>
