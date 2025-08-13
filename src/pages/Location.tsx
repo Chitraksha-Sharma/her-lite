@@ -51,7 +51,7 @@ const LocationSector = () => {
     fetchLocations();
   }, [navigate]);
 
-  const { session } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -75,10 +75,10 @@ const LocationSector = () => {
         }));
 
       //fetch user info
-      if (!session?.user?.uuid) {
-        throw new Error("No user UUID found in session");
+      if (!user?.id) {
+        throw new Error("No user ID found in auth state");
       }
-      const userData = await getUser(session.user.uuid);
+      const userData = await getUser(user.id);
 
       //fetch provider info
       if (!userData?.person?.uuid) {
