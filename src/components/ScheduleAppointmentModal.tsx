@@ -192,19 +192,19 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({ chi
             </Select>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
-                         <div className="space-y-2">
-               <Label htmlFor="phone">Phone Number *</Label>
-               <Input
-                  id="phone"
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handlePhoneChange}
-                  placeholder="Enter 10-digit number"
-                  required
-               />
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handlePhoneChange}
+                placeholder="Enter 10-digit number"
+                required
+              />
              </div>
-                         <div className="space-y-2">
+             <div className="space-y-2">
                <Label htmlFor="email">Email</Label>
                <Input
                  id="email"
