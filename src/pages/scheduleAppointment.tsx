@@ -75,13 +75,13 @@ const ScheduleAppointment = () => {
                     onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                     required
                     /> */}
-                    <Button
+                    {/* <Button
                           variant="outline"
                           className="w-full justify-start text-left font-normal"
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {formData.dateOfBirth ? format(formData.dateOfBirth, "PPP") : "Pick a date"}
-                        </Button>
+                        </Button> */}
                 </div>
             </div>
             <div className="space-y-2">

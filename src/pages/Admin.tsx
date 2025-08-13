@@ -186,7 +186,6 @@ const Admin: React.FC = () => {
       title: 'ID Generation',
       description: 'Patient and entity ID management',
       icon: Database,
-      
     },
     {
       id: 'system-settings',

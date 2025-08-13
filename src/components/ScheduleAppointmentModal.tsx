@@ -14,6 +14,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface ScheduleAppointmentModalProps {
   children: React.ReactNode;
@@ -24,7 +28,7 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({ chi
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    dateOfBirth: "",
+    dateOfBirth: undefined as Date | undefined,
     gender: "",
     phone: "",
     email: "",
@@ -49,7 +53,7 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({ chi
     setFormData({
       firstName: "",
       lastName: "",
-      dateOfBirth: "",
+      dateOfBirth: undefined,
       gender: "",
       phone: "",
       email: "",
@@ -99,13 +103,25 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({ chi
             </div>
             <div className="space-y-2">
               <Label>Date of Birth *</Label>
-              <Input
-                id="dob"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                required
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.dateOfBirth ? format(formData.dateOfBirth, "PPP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.dateOfBirth}
+                    onSelect={(date) => setFormData(prev => ({ ...prev, dateOfBirth: date }))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
           <div className="space-y-2">
