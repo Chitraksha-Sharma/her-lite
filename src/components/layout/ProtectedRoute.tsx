@@ -1,18 +1,17 @@
 // src/components/layout/ProtectedRoute.tsx
 import React from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAdminAccess } from '@/lib/roleUtils';
 import { useAuth } from '@/api/context/AuthContext';
 import AccessDenied from './AccessDenied';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  fallback?: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
-  fallback = <AccessDenied /> 
-}) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { session, loading } = useAuth();
+  const hasAdminAccess = useAdminAccess();
 
   if (loading) {
     return (
@@ -22,8 +21,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  if (!session || !session.authenticated) {
-    return <>{fallback}</>;
+  // Redirect to login if not authenticated
+  if (!session?.authenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Show access denied if authenticated but no admin access
+  if (!hasAdminAccess) {
+    return <AccessDenied />;
   }
 
   return <>{children}</>;

@@ -21,6 +21,7 @@ import {
   Edit,
   Trash2
 } from "lucide-react";
+import { useAuth } from "@/api/context/AuthContext";
 
 // Interface for admin tile data
 interface AdminTileData {
@@ -119,6 +120,7 @@ const AdminTile: React.FC<AdminTileProps> = ({ data, onClick }) => {
 
 // Admin Page Component
 const Admin: React.FC = () => {
+  const { session, userRoles } = useAuth();
   // Admin tiles data - easily extensible
   const adminTiles: AdminTileData[] = [
     {
@@ -214,8 +216,13 @@ const Admin: React.FC = () => {
         </div>
         <div className="flex items-center space-x-2">
           <Badge variant="outline" className="text-sm">
-            System Admin
+            {session?.user?.display || 'Admin User'}
           </Badge>
+          {userRoles.map((role, index) => (
+            <Badge key={index} variant="secondary" className="text-sm">
+              {role}
+            </Badge>
+          ))}
         </div>
       </div>
 
