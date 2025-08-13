@@ -44,8 +44,62 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({ chi
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Phone number formatting with +91 country code
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-numeric characters
+    const numericValue = value.replace(/\D/g, "");
+    const limitedValue = numericValue.slice(0, 10);
+    
+    if (limitedValue.length > 0) {
+      return `+91 ${limitedValue}`;
+    }
+    return "";
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatPhoneNumber(e.target.value);
+    setFormData(prev => ({ ...prev, phone: formattedValue }));
+  };
+
+  // Email validation
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const email = e.target.value;
+    setFormData(prev => ({ ...prev, email }));
+    
+    // Optional: Add real-time validation feedback
+    if (email && !validateEmail(email)) {
+      console.log("Invalid email format");
+    }
+  };
+
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate phone number format
+    const phoneRegex = /^\+91 \d{10}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      alert("Please enter a valid 10-digit phone number");
+      return;
+    }
+    
+    // Validate email if provided
+    if (formData.email && !validateEmail(formData.email)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+    
+    // Validate emergency phone if provided
+    if (formData.emergencyPhone && !phoneRegex.test(formData.emergencyPhone)) {
+      alert("Please enter a valid emergency contact phone number");
+      return;
+    }
+    
     console.log("Patient data submitted:", formData);
     // Send formData to your backend API
     setOpen(false); // Close modal after submission
@@ -138,29 +192,28 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({ chi
             </Select>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number *</Label>
-              <Input
-                id="phone"
-                type='tel'
-                value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
-                placeholder="Enter phone number"
-                maxLength={10}
-                pattern='[0-9]{10}'
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                placeholder="Enter email address"
-              />
-            </div>
+                         <div className="space-y-2">
+               <Label htmlFor="phone">Phone Number *</Label>
+               <Input
+                  id="phone"
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handlePhoneChange}
+                  placeholder="Enter 10-digit number"
+                  required
+               />
+             </div>
+                         <div className="space-y-2">
+               <Label htmlFor="email">Email</Label>
+               <Input
+                 id="email"
+                 type="email"
+                 value={formData.email}
+                 onChange={handleEmailChange}
+                 placeholder="Enter email address"
+               />
+             </div>
           </div>
           <div className="space-y-2 md:col-span-2">
             <Label htmlFor="address">Address</Label>
@@ -182,15 +235,19 @@ const ScheduleAppointmentModal: React.FC<ScheduleAppointmentModalProps> = ({ chi
                 placeholder="Enter emergency contact name"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="emergencyPhone">Emergency Contact Phone</Label>
-              <Input
-                id="emergencyPhone"
-                value={formData.emergencyPhone}
-                onChange={(e) => handleInputChange("emergencyPhone", e.target.value)}
-                placeholder="Enter emergency contact phone"
-              />
-            </div>
+                         <div className="space-y-2">
+               <Label htmlFor="emergencyPhone">Emergency Contact Phone</Label>
+               <Input
+                 id="emergencyPhone"
+                 type="tel"
+                 value={formData.emergencyPhone}
+                 onChange={(e) => {
+                   const formattedValue = formatPhoneNumber(e.target.value);
+                   setFormData(prev => ({ ...prev, emergencyPhone: formattedValue }));
+                 }}
+                 placeholder="Enter emergency contact phone"
+               />
+             </div>
           </div>
           {/* Action Buttons */}
           <div className="flex justify-end gap-2">
