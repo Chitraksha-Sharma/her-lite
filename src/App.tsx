@@ -19,7 +19,6 @@ import MainLayout from "./components/layout/MainLayout";
 import LocationSector from "./pages/Location";
 import { AuthProvider } from "./api/context/AuthContext";
 import Admin from "./pages/Admin";
-import { USER_ROLES } from "./api/context/AuthContext";
 
 
 const queryClient = new QueryClient();
@@ -102,8 +101,8 @@ const App = () => (
               </MainLayout>
             </ProtectedRoute>
           } />
-          <Route path="/Admin" element={
-            <ProtectedRoute allowedRoles={['system_developer', 'admin']}>
+          <Route path="/admin" element={
+            <ProtectedRoute>
               <MainLayout>
                 <Admin />
               </MainLayout>
