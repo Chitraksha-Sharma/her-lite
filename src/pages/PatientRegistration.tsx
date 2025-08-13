@@ -36,6 +36,39 @@ const PatientRegistration = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+   // Phone number formatting with +91 country code
+   const formatPhoneNumber = (value: string) => {
+    // Remove all non-numeric characters
+    const numericValue = value.replace(/\D/g, "");
+    const limitedValue = numericValue.slice(0, 10);
+    
+    if (limitedValue.length > 0) {
+      return `+91 ${limitedValue}`;
+    }
+    return "";
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatPhoneNumber(e.target.value);
+    setFormData(prev => ({ ...prev, phone: formattedValue }));
+  };
+
+  // Email validation
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const email = e.target.value;
+    setFormData(prev => ({ ...prev, email }));
+    
+    // Optional: Add real-time validation feedback
+    if (email && !validateEmail(email)) {
+      console.log("Invalid email format");
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Patient data submitted:", formData);
@@ -389,9 +422,11 @@ const PatientRegistration = () => {
                 <Label htmlFor="phone">Phone Number *</Label>
                 <Input
                   id="phone"
+                  type="tel"
+                  name="phone"
                   value={formData.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                  placeholder="Enter phone number"
+                  onChange={handlePhoneChange}
+                  placeholder="Enter 10-digit number"
                   required
                 />
               </div>
@@ -401,7 +436,7 @@ const PatientRegistration = () => {
                   id="email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  onChange={handleEmailChange}
                   placeholder="Enter email address"
                 />
               </div>
