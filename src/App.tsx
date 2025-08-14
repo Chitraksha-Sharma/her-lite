@@ -19,6 +19,7 @@ import MainLayout from "./components/layout/MainLayout";
 import LocationSector from "./pages/Location";
 import { AuthProvider } from "./api/context/AuthContext";
 import Admin from "./pages/Admin";
+import TileManagementPage from "./pages/TileManagementPage";
 
 
 const queryClient = new QueryClient();
@@ -105,6 +106,13 @@ const App = () => (
             <ProtectedRoute>
               <MainLayout>
                 <Admin />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/:tileId" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <TileManagementPage />
               </MainLayout>
             </ProtectedRoute>
           } />
