@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,7 @@ import {
   Trash2
 } from "lucide-react";
 import { useAuth } from "@/api/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 // Interface for admin tile data
 interface AdminTileData {
@@ -37,7 +38,34 @@ interface AdminTileData {
   icon: React.ComponentType<{ className?: string }>;
     onClick: () => void;
   }[];
+  subTiles?: SubTileData[];
 }
+
+interface SubTileData {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  onClick: () => void;
+}
+
+//SubTile component
+const SubTile: React.FC<{ data: SubTileData }> = ({ data }) => {
+  return (
+    <button
+      onClick={data.onClick}
+      className="flex items-center p-3 bg-muted/50 hover:bg-primary/10 rounded-lg border transition-all text-left group"
+    >
+      <div className="p-2 rounded-md bg-primary/10">
+        <data.icon className="h-5 w-5 text-primary" />
+      </div>
+      <div className="ml-3">
+        <h4 className="font-medium text-gray-800 group-hover:text-primary">{data.title}</h4>
+        <p className="text-xs text-gray-500">{data.description}</p>
+      </div>
+    </button>
+  );
+};
 
 // Interface for admin tile props
 interface AdminTileProps {
@@ -55,6 +83,7 @@ const AdminTile: React.FC<AdminTileProps> = ({ data, onClick }) => {
       default: return 'bg-blue-100 text-blue-800';
     }
   };
+
 
   return (
     <Card 
@@ -76,11 +105,11 @@ const AdminTile: React.FC<AdminTileProps> = ({ data, onClick }) => {
               </CardDescription>
             </div>
           </div>
-          {data.count !== undefined && (
+          {/* {data.count !== undefined && (
             <Badge variant="secondary" className="text-xs">
               {data.count}
             </Badge>
-          )}
+          )} */}
         </div>
       </CardHeader>
       
@@ -109,6 +138,8 @@ const AdminTile: React.FC<AdminTileProps> = ({ data, onClick }) => {
                 </Button>
               ))}
             </div>
+
+
           ) : (
             <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
           )}
@@ -121,6 +152,13 @@ const AdminTile: React.FC<AdminTileProps> = ({ data, onClick }) => {
 // Admin Page Component
 const Admin: React.FC = () => {
   const { session, userRoles } = useAuth();
+  const navigate = useNavigate();
+
+  const [openTileId, setOpenTileId] = useState<string | null>(null);
+  const toggleTile = (tileId: string) => {
+    setOpenTileId(openTileId === tileId ? null : tileId);
+  };
+
   // Admin tiles data - easily extensible
   const adminTiles: AdminTileData[] = [
     {
@@ -128,6 +166,36 @@ const Admin: React.FC = () => {
       title: 'Users',
       description: 'Manage system users and permissions',
       icon: Users,
+      subTiles: [
+        {
+          id: 'view-users',
+          title: 'View All Users',
+          description: 'Browse and search users',
+          icon: Users,
+          onClick: () => navigate('/admin/users'),
+        },
+        {
+          id: 'create-user',
+          title: 'Create User',
+          description: 'Add new system user',
+          icon: UserPlus,
+          onClick: () => navigate('/admin/users/new'),
+        },
+        {
+          id: 'roles',
+          title: 'Roles & Permissions',
+          description: 'Manage access levels',
+          icon: Shield,
+          onClick: () => navigate('/admin/roles'),
+        },
+        {
+          id: 'audit',
+          title: 'Audit Log',
+          description: 'User activity history',
+          icon: FileText,
+          onClick: () => navigate('/admin/audit'),
+        },
+      ],
     },
     {
       id: 'patients',
@@ -199,6 +267,10 @@ const Admin: React.FC = () => {
 
   // Handle tile click
   const handleTileClick = (tileId: string) => {
+    if (adminTiles.find(t => t.id === tileId)?.subTiles) {
+      // Don't navigate if it has subTiles — just expand
+      return;
+    }
     console.log(`Navigating to ${tileId} management`);
     // Here you can add navigation logic
     // navigate(`/admin/${tileId}`);
@@ -230,12 +302,30 @@ const Admin: React.FC = () => {
       <div>
         <h2 className="text-xl font-semibold text-primary mb-4">System Management</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {adminTiles.map((tile) => (
+          {/* {adminTiles.map((tile) => (
             <AdminTile
               key={tile.id}
               data={tile}
               onClick={() => handleTileClick(tile.id)}
             />
+          ))} */}
+          {adminTiles.map((tile) => (
+            <React.Fragment key={tile.id}>
+              {/* Main Admin Tile */}
+              <AdminTile
+                data={tile}
+                onClick={() => tile.subTiles ? toggleTile(tile.id) : handleTileClick(tile.id)}
+              />
+
+              {/* Sub-Tiles (if any and if expanded) */}
+              {tile.subTiles && openTileId === tile.id && (
+                <div className="lg:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2 animate-in slide-in-from-top-2 duration-200">
+                  {tile.subTiles.map((subTile) => (
+                    <SubTile key={subTile.id} data={subTile} />
+                  ))}
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
       </div>
