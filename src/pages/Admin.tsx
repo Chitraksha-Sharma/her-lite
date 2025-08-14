@@ -218,11 +218,11 @@ const Admin: React.FC = () => {
           <Badge variant="outline" className="text-sm">
             {session?.user?.display || 'Admin User'}
           </Badge>
-          {userRoles.map((role, index) => (
+          {/* {userRoles.map((role, index) => (
             <Badge key={index} variant="secondary" className="text-sm">
               {role}
             </Badge>
-          ))}
+          ))} */}
         </div>
       </div>
 

@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertCircle, MapPin, Loader2 } from "lucide-react";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 import { getLocations, Location } from "@/api/location";
-import {getUser} from "@/api/user";
+import { getUser } from "@/api/user";
 import { getProvider } from "@/api/provider";
 import { useAuth } from "@/api/context/AuthContext";
 
@@ -17,6 +17,7 @@ const LocationSector = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
   // Fetch locations when component mounts
   useEffect(() => {
@@ -31,11 +32,9 @@ const LocationSector = () => {
           setLocations(response.data);
         } else {
           setError(response.error || "Failed to load locations");
-          
-          // If session expired, redirect to login
+
           if (response.error?.includes("Session expired")) {
-            localStorage.removeItem("isAuthenticated");
-            localStorage.removeItem("user");
+            localStorage.clear();
             navigate("/login");
             return;
           }
@@ -51,7 +50,6 @@ const LocationSector = () => {
     fetchLocations();
   }, [navigate]);
 
-  const { user, isAuthenticated } = useAuth();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -64,41 +62,50 @@ const LocationSector = () => {
     }
 
     try {
-      // Find the selected location object
       const selectedLocation = locations.find(loc => loc.uuid === location);
-      
-      if (selectedLocation) {
-        // Store both UUID and display name
-        localStorage.setItem("currentLocation", JSON.stringify({
-          uuid: selectedLocation.uuid,
-          display: selectedLocation.display
-        }));
 
-      //fetch user info
-      if (!user?.id) {
-        throw new Error("No user ID found in auth state");
+      if (!selectedLocation) {
+        setError("Selected location is invalid. Please try again.");
+        setIsSubmitting(false);
+        return;
       }
-      const userData = await getUser(user.id);
 
-      //fetch provider info
+      // Store location
+      localStorage.setItem("currentLocation", JSON.stringify({
+        uuid: selectedLocation.uuid,
+        display: selectedLocation.display
+      }));
+
+      // --- Updated user ID handling ---
+      // const userId = user?.id || user?.uuid;
+      // if (!userId) {
+      //   throw new Error("No user ID found in auth state");
+      // }
+      if (!user?.uuid) {
+        console.error("No user ID found");
+        return;
+      }
+
+      // Fetch user & provider data
+      const userData = await getUser(user.uuid);
+
       if (!userData?.person?.uuid) {
         throw new Error("No person UUID found in user data");
       }
-      const providerData = await getProvider(userData.person.uuid); 
 
-      // store both user and provider
+      const providerData = await getProvider(userData.person.uuid);
+
+      // Store both user and provider
       localStorage.setItem("currentUser", JSON.stringify(userData));
       localStorage.setItem("currentProvider", JSON.stringify(providerData));
 
-        toast({
-          title: 'Location selected',
-          description: `Welcome to ${selectedLocation.display}`,
-        });
+      toast({
+        title: 'Location selected',
+        description: `Welcome to ${selectedLocation.display}`,
+      });
 
-        navigate("/dashboard");
-      } else {
-        setError("Selected location is invalid. Please try again.");
-      }
+      navigate("/dashboard");
+
     } catch (err) {
       console.error("Error selecting location:", err);
       setError("An error occurred while selecting location.");
@@ -111,13 +118,22 @@ const LocationSector = () => {
     window.location.reload();
   };
 
+  if (!isAuthenticated) {
+    // Optional: redirect if not logged in
+    navigate("/login");
+    return null;
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{
-      backgroundImage: `url('/wallpaper-login.jpg')`,
-      backgroundSize: 'cover',
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center',
-    }}>
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{
+        backgroundImage: `url('/wallpaper-login.jpg')`,
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+      }}
+    >
       <Card className="w-full max-w-md shadow-xl border-blue-200">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
@@ -152,15 +168,15 @@ const LocationSector = () => {
               <label htmlFor="location" className="text-sm font-medium text-gray-700">
                 Select Location Sector
               </label>
-              
+
               {isLoading ? (
                 <div className="flex items-center justify-center p-8">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   <span className="ml-2 text-gray-600">Loading locations...</span>
                 </div>
               ) : (
-                <Select 
-                  value={location} 
+                <Select
+                  value={location}
                   onValueChange={setLocation}
                   disabled={isSubmitting || locations.length === 0}
                 >

@@ -7,6 +7,7 @@ export async function getUser(userUuid: string) {
     },
   });
 
+  console.log("user--<<",response)
   if (!response.ok) {
     throw new Error(`Failed to fetch user: ${response.statusText}`);
   }

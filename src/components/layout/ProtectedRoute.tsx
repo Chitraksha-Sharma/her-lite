@@ -27,9 +27,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   // Show access denied if authenticated but no admin access
-  if (!hasAdminAccess) {
-    return <AccessDenied />;
-  }
+  // if (!hasAdminAccess) {
+  //   return <AccessDenied />;
+  // }
 
   return <>{children}</>;
 };
