@@ -61,7 +61,9 @@ export function AppSidebar() {
   const handleLogout = async () => {
     try {
       await logout();
-      window.location.href = "/login"; // force redirect to login
+      window.location.href = "/login";
+      localStorage.clear();
+       // force redirect to login
     } catch (err) {
       console.error("Logout failed", err);
     }

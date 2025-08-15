@@ -19,7 +19,7 @@ const Login = () => {
   const { login,session } = useAuth();
   useEffect(() => {
     if (session?.authenticated) {
-      navigate("/dashboard"); // or "/location" if you prefer
+      navigate("/location"); // or "/location" if you prefer
     }
   }, [session, navigate]);
 

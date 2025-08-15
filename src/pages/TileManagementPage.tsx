@@ -94,7 +94,7 @@ const tileConfigs: Record<string, TileConfig> = {
     title: 'Users',
     description: 'Manage system users and permissions',
     icon: Users,
-    color: 'bg-blue-500',
+    // color: 'bg-blue-500',
     subTiles: [
       {
         id: 'view-users',
@@ -131,7 +131,7 @@ const tileConfigs: Record<string, TileConfig> = {
     title: 'Patients',
     description: 'Patient records and information',
     icon: UserCheck,
-    color: 'bg-green-500',
+    // color: 'bg-green-500',
     subTiles: [
       {
         id: 'view-patients',

@@ -4,10 +4,10 @@ const BASE_URL = '/openmrs/ws/rest/v1';
 
 export async function loginWithOpenMRS(username: string, password: string) {
   // Step 1: kill any existing session first
-  await fetch(`${BASE_URL}/session`, {
-    method: "DELETE",
-    credentials: "include",
-  });
+  // await fetch(`${BASE_URL}/session`, {
+  //   method: "DELETE",
+  //   credentials: "include",
+  // });
 
   // Step 2: attempt login with provided credentials
   const credentials = btoa(`${username}:${password}`);

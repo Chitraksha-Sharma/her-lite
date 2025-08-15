@@ -163,7 +163,6 @@ const Admin: React.FC = () => {
       title: 'Users',
       description: 'Manage system users and permissions',
       icon: Users,
-      color: 'bg-blue-500',
       moduleCount: 4, // View Users, Create User, Roles, Audit
       // subTiles: [
       //   {
@@ -201,7 +200,6 @@ const Admin: React.FC = () => {
       title: 'Patients',
       description: 'Patient records and information',
       icon: UserCheck,
-      color: 'bg-green-500',
       moduleCount: 3, // View, Register, Medical History
     },
     {
@@ -209,7 +207,6 @@ const Admin: React.FC = () => {
       title: 'Person',
       description: 'Personnel and staff management',
       icon: UserPlus,
-      color: 'bg-purple-500',
       moduleCount: 2, // Staff Directory, Staff Registration
     },
     {
@@ -217,7 +214,6 @@ const Admin: React.FC = () => {
       title: 'Visits',
       description: 'Patient visit tracking and history',
       icon: Calendar,
-      color: 'bg-orange-500',
       moduleCount: 3, // Schedule, History, Analytics
     },
     {
@@ -225,7 +221,6 @@ const Admin: React.FC = () => {
       title: 'Encounters',
       description: 'Clinical encounters and interactions',
       icon: Stethoscope,
-      color: 'bg-red-500',
       moduleCount: 4, // View, Create, Templates, Reports
     },
     {
@@ -233,7 +228,6 @@ const Admin: React.FC = () => {
       title: 'Providers',
       description: 'Healthcare provider management',
       icon: Shield,
-      color: 'bg-indigo-500',
       moduleCount: 3, // Directory, Registration, Credentials
     },
     {
@@ -241,7 +235,7 @@ const Admin: React.FC = () => {
       title: 'Locations',
       description: 'Facility and location management',
       icon: MapPin,
-      color: 'bg-teal-500',
+      // color: 'bg-teal-500',
       moduleCount: 2, // Facilities, Room Management
     },
     {
@@ -249,7 +243,7 @@ const Admin: React.FC = () => {
       title: 'Observations',
       description: 'Clinical observations and findings',
       icon: Activity,
-      color: 'bg-cyan-500',
+      // color: 'bg-cyan-500',
       moduleCount: 3, // View, Entry, Analytics
     },
     {
@@ -257,7 +251,7 @@ const Admin: React.FC = () => {
       title: 'Scheduler',
       description: 'Appointment and scheduling system',
       icon: Clock,
-      color: 'bg-yellow-500',
+      // color: 'bg-yellow-500',
       moduleCount: 4, // Calendar, Appointments, Resources, Reports
     },
     {
@@ -265,7 +259,7 @@ const Admin: React.FC = () => {
       title: 'Programs',
       description: 'Healthcare programs and initiatives',
       icon: FileText,
-      color: 'bg-pink-500',
+      // color: 'bg-pink-500',
       moduleCount: 3, // Active Programs, Enrollment, Reporting
     },
     {
@@ -273,7 +267,7 @@ const Admin: React.FC = () => {
       title: 'ID Generation',
       description: 'Patient and entity ID management',
       icon: Database,
-      color: 'bg-gray-500',
+      // color: 'bg-gray-500',
       moduleCount: 2, // ID Pools, Configuration
     },
     {
@@ -281,7 +275,7 @@ const Admin: React.FC = () => {
       title: 'System Settings',
       description: 'System configuration and preferences',
       icon: Settings,
-      color: 'bg-slate-500',
+      // color: 'bg-slate-500',
       moduleCount: 5, // General, Security, Integrations, Backup, Logs
     }
   ];
