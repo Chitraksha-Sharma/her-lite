@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPerson } from '@/api/person';
 import { createUser, getRoles } from '@/api/user';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,9 @@ export default function CreateUser() {
     username: '',
     password: '',
     confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    gender: '',
     personUuid: '', // You'll need a person first (simplified here)
     selectedRoles: [] as string[],
   });
@@ -52,11 +56,24 @@ export default function CreateUser() {
 
     setLoading(true);
     try {
+        // Step 1: Create Person
+    const personData = await createPerson({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        gender: formData.gender,
+      });
+  
+      const personUuid = personData.uuid;
+      if (!personUuid) {
+        throw new Error('Person creation failed: No UUID returned');
+      }
+
+      //create user with new personUuid
       await createUser({
         username: formData.username,
         password: formData.password,
         confirmPassword: formData.password,
-        person: { uuid: formData.personUuid || '82e0a560-7eac-11e0-8c9e-0017a4787fac' }, // Default "Unknown Person" (use real person picker later)
+        personUuid, // Default "Unknown Person" (use real person picker later)
         roles: formData.selectedRoles.map((uuid) => ({ uuid })),
       });
 
@@ -105,6 +122,40 @@ export default function CreateUser() {
               onChange={handleChange}
               required
             />
+          </div>
+          <div>
+          <Label>First Name</Label>
+            <Input
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+            />
+          </div>
+
+          <div>
+          <Label>Last Name</Label>
+            <Input
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+            />
+          </div>
+
+          <div>
+          <Label>Gender</Label>
+            <select
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                className="w-full border rounded p-2"
+                required
+            >
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="O">Other</option>
+            </select>
           </div>
           <div>
             <Label>Assign Roles</Label>

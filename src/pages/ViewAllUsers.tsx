@@ -40,12 +40,12 @@ export default function ViewAllUsers() {
   return (
     <div className="space-y-4">
       <div className="flex items-center max-w-md">
-        <Search className="h-4 w-4 text-gray-500 ml-3" />
+        <Search className="h-6 w-6 text-gray-500 ml-3" />
         <Input
           placeholder="Search users..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
+          className="pl-10 ml-3"
         />
       </div>
 
