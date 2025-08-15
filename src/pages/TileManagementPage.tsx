@@ -18,6 +18,10 @@ import {
   Database,
   Settings
 } from "lucide-react";
+import CreateUser from './CreateUser';
+import RolesPermissions from './RolesPermissions';
+import ViewAllUsers from './ViewAllUsers';
+// import <AuditLog></AuditLog>
 
 // Define the structure for subtile data
 interface SubTileData {
@@ -39,53 +43,53 @@ interface TileConfig {
 }
 
 // Sample components for different subtiles (you'll replace these with actual components)
-const ViewAllUsers: React.FC = () => (
-  <div className="space-y-6">
-    <h3 className="text-2xl font-semibold">All Users</h3>
-    <Card>
-      <CardContent className="p-6">
-        <p>User management table will go here...</p>
-        {/* Add your user table/grid component here */}
-      </CardContent>
-    </Card>
-  </div>
-);
+// const ViewAllUsers: React.FC = () => (
+//   <div className="space-y-6">
+//     <h3 className="text-2xl font-semibold">All Users</h3>
+//     <Card>
+//       <CardContent className="p-6">
+//         <p>User management table will go here...</p>
+//         {/* Add your user table/grid component here */}
+//       </CardContent>
+//     </Card>
+//   </div>
+// );
 
-const CreateUser: React.FC = () => (
-  <div className="space-y-6">
-    <h3 className="text-2xl font-semibold">Create New User</h3>
-    <Card>
-      <CardContent className="p-6">
-        <p>User creation form will go here...</p>
-        {/* Add your user creation form here */}
-      </CardContent>
-    </Card>
-  </div>
-);
+// const CreateUser: React.FC = () => (
+//   <div className="space-y-6">
+//     <h3 className="text-2xl font-semibold">Create New User</h3>
+//     <Card>
+//       <CardContent className="p-6">
+//         <p>User creation form will go here...</p>
+//         {/* Add your user creation form here */}
+//       </CardContent>
+//     </Card>
+//   </div>
+// );
 
-const RolesPermissions: React.FC = () => (
-  <div className="space-y-6">
-    <h3 className="text-2xl font-semibold">Roles & Permissions</h3>
-    <Card>
-      <CardContent className="p-6">
-        <p>Roles and permissions management will go here...</p>
-        {/* Add your roles management component here */}
-      </CardContent>
-    </Card>
-  </div>
-);
+// const RolesPermissions: React.FC = () => (
+//   <div className="space-y-6">
+//     <h3 className="text-2xl font-semibold">Roles & Permissions</h3>
+//     <Card>
+//       <CardContent className="p-6">
+//         <p>Roles and permissions management will go here...</p>
+//         {/* Add your roles management component here */}
+//       </CardContent>
+//     </Card>
+//   </div>
+// );
 
-const AuditLog: React.FC = () => (
-  <div className="space-y-6">
-    <h3 className="text-2xl font-semibold">Audit Log</h3>
-    <Card>
-      <CardContent className="p-6">
-        <p>Audit log table will go here...</p>
-        {/* Add your audit log component here */}
-      </CardContent>
-    </Card>
-  </div>
-);
+// const AuditLog: React.FC = () => (
+//   <div className="space-y-6">
+//     <h3 className="text-2xl font-semibold">Audit Log</h3>
+//     <Card>
+//       <CardContent className="p-6">
+//         <p>Audit log table will go here...</p>
+//         {/* Add your audit log component here */}
+//       </CardContent>
+//     </Card>
+//   </div>
+// );
 
 // Configuration for all tiles and their subtiles
 const tileConfigs: Record<string, TileConfig> = {
@@ -117,13 +121,13 @@ const tileConfigs: Record<string, TileConfig> = {
         icon: Shield,
         component: RolesPermissions,
       },
-      {
-        id: 'audit',
-        title: 'Audit Log',
-        description: 'User activity history',
-        icon: FileText,
-        component: AuditLog,
-      },
+      // {
+      //   id: 'audit',
+      //   title: 'Audit Log',
+      //   description: 'User activity history',
+      //   icon: FileText,
+      //   component: AuditLog,
+      // },
     ],
   },
   patients: {
@@ -174,7 +178,7 @@ const TileManagementPage: React.FC = () => {
       <div className="p-6">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-red-600">Tile Not Found</h2>
-          <p className="text-muted-foreground mt-2">The requested tile does not exist.</p>
+          {/* <p className="text-muted-foreground mt-2">The requested tile does not exist.</p> */}
           <Button 
             onClick={() => navigate('/admin')} 
             className="mt-4"

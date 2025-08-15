@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner'; // Optional: for notifications
 
-export default function CreateUserComponent() {
+export default function CreateUser() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState<{ uuid: string; display: string }[]>([]);
@@ -20,6 +20,7 @@ export default function CreateUserComponent() {
   });
 
   useEffect(() => {
+    console.log("CreateUser component loaded!");
     const loadRoles = async () => {
       try {
         const data = await getRoles();
