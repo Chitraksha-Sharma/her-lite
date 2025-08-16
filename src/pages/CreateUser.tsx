@@ -18,7 +18,7 @@ export default function CreateUser() {
     confirmPassword: '',
     firstName: '',
     lastName: '',
-    gender: '',
+    gender: 'M',
     personUuid: '', // You'll need a person first (simplified here)
     selectedRoles: [] as string[],
   });
@@ -49,10 +49,10 @@ export default function CreateUser() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
+    // if (formData.password !== formData.confirmPassword) {
+    //   toast.error('Passwords do not match');
+    //   return;
+    // }
 
     setLoading(true);
     try {
@@ -63,7 +63,7 @@ export default function CreateUser() {
         gender: formData.gender,
       });
   
-      const personUuid = personData.uuid;
+      const personUuid = personData;
       if (!personUuid) {
         throw new Error('Person creation failed: No UUID returned');
       }
@@ -72,8 +72,8 @@ export default function CreateUser() {
       await createUser({
         username: formData.username,
         password: formData.password,
-        confirmPassword: formData.password,
-        personUuid, // Default "Unknown Person" (use real person picker later)
+        // confirmPassword: formData.password,
+        person: {uuid: formData.personUuid}, // Default "Unknown Person" (use real person picker later)
         roles: formData.selectedRoles.map((uuid) => ({ uuid })),
       });
 
@@ -113,7 +113,7 @@ export default function CreateUser() {
             />
           </div>
 
-          <div>
+          {/* <div>
             <Label>Confirm Password</Label>
             <Input
               type="password"
@@ -122,7 +122,7 @@ export default function CreateUser() {
               onChange={handleChange}
               required
             />
-          </div>
+          </div> */}
           <div>
           <Label>First Name</Label>
             <Input

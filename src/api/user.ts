@@ -38,7 +38,7 @@ export async function getUser(uuid: string) {
 export async function createUser(userData: {
   username: string;
   password: string;
-  confirmPassword: string;
+  // confirmPassword: string;
   person: { uuid: string};
   roles: { uuid: string }[];
 }) {
@@ -47,7 +47,7 @@ export async function createUser(userData: {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      // 'Accept': 'application/json',
     },
     credentials: 'include',
     body: JSON.stringify(userData),
