@@ -134,7 +134,7 @@ export default function RolesPermissions() {
     </Card>
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         {/* <DialogContent className="sm:max-w-md"> */}
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Role</DialogTitle>
           </DialogHeader>
@@ -167,23 +167,23 @@ export default function RolesPermissions() {
 
               <div>
                 <Label>Inherited Roles</Label>
-                <Select
-                  multiple
-                  value={form.inheritedRoleUuids}
-                  onValueChange={handleInheritedRoleChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select inherited roles..." />
-                  </SelectTrigger>
-                  <SelectContent>
+                <div className="border rounded p-2">
+                  <select
+                    multiple
+                    value={form.inheritedRoleUuids}
+                    onChange={(e) => {
+                      const selected = Array.from(e.target.selectedOptions, (opt) => opt.value);
+                      setForm((prev) => ({ ...prev, inheritedRoleUuids: selected }));
+                    }}
+                    className="w-full p-2 border-none focus:outline-none h-28 bg-transparent"
+                  >
                     {roles.map((r) => (
-                      <SelectItem key={r.uuid} value={r.uuid}>
+                      <option key={r.uuid} value={r.uuid}>
                         {r.display}
-                      </SelectItem>
+                      </option>
                     ))}
-                    <option>None</option>
-                  </SelectContent>
-                </Select>
+                  </select>
+                </div>
                 <p className="text-xs text-gray-500 mt-1">
                   Note: Inheritance is conceptual. Privileges must be assigned directly.
                 </p>
