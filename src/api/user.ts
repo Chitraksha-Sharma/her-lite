@@ -70,19 +70,19 @@ export async function createUser(userData: {
 
 export const createRole = async (roleData: {
   uuid?: string;
-  display: string;
+  name: string;
   description?: string;
   privileges?: { uuid: string }[];
   inheritedRoles?: { uuid: string }[];
 }) => {
   const payload: any = {
-    displayName: roleData.display,
+    name: roleData.name,
     description: roleData.description || '',
     privileges: roleData.privileges || [],
     // Note: OpenMRS doesn't directly support "inheritedRoles" in POST — handled manually via roles
   };
 
-  const res = await fetch('/openmrs/ws/rest/v1/role', {
+  const res = await fetch(`${BASE_URL}/role`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

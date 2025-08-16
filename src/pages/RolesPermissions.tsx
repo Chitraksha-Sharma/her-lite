@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getRoles } from '@/api/user';
+import { createRole } from '@/api/user';
 import { getPrivileges } from '@/api/privilege';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -73,7 +74,7 @@ export default function RolesPermissions() {
     setSubmitting(true);
     try {
       const payload = {
-        display: form.display,
+        name: form.display,
         description: form.description,
         privileges: form.privilegeUuids.map((uuid) => ({ uuid })),
       };
@@ -97,9 +98,11 @@ export default function RolesPermissions() {
 
 
   return (
-    <Card>
+    <div className='space-y-6'>
+      <Card>
       <CardHeader>
         <CardTitle>Roles & Permissions</CardTitle>
+        <Button onClick={handleOpenModal}> Add Role</Button>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -128,13 +131,17 @@ export default function RolesPermissions() {
           )}
         </div>
       </CardContent>
-      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-md">
+    </Card>
+    <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        {/* <DialogContent className="sm:max-w-md"> */}
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Role</DialogTitle>
           </DialogHeader>
+
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-2">
+              {/* Role Name */}
               <div>
                 <Label htmlFor="display">Role Name *</Label>
                 <Input
@@ -145,6 +152,8 @@ export default function RolesPermissions() {
                   required
                 />
               </div>
+
+              {/* Description */}
               <div>
                 <Label htmlFor="description">Description</Label>
                 <Input
@@ -159,9 +168,9 @@ export default function RolesPermissions() {
               <div>
                 <Label>Inherited Roles</Label>
                 <Select
-                  onValueChange={(values) => handleInheritedRoleChange(values)}
-                  value={form.inheritedRoleUuids}
                   multiple
+                  value={form.inheritedRoleUuids}
+                  onValueChange={handleInheritedRoleChange}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select inherited roles..." />
@@ -172,6 +181,7 @@ export default function RolesPermissions() {
                         {r.display}
                       </SelectItem>
                     ))}
+                    <option>None</option>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-gray-500 mt-1">
@@ -180,26 +190,28 @@ export default function RolesPermissions() {
               </div>
 
               <div>
-                <Label>Privileges *</Label>
-                <Select
-                  onValueChange={handlePrivilegeChange}
-                  value={form.privilegeUuids}
-                  multiple
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select privileges..." />
-                  </SelectTrigger>
-                  <SelectContent>
+                <Label>Privileges *</Label>             
+                <div className="border rounded p-2">                 
+                  <select
+                    multiple
+                    value={form.privilegeUuids}
+                    onChange={(e) => {
+                      const selected = Array.from(e.target.selectedOptions, (opt) => opt.value);
+                      setForm((prev) => ({ ...prev, privilegeUuids: selected }));
+                    }}
+                    className="w-full p-2 border rounded h-28 focus:outline-none"
+                  >
                     {privileges.map((p) => (
-                      <SelectItem key={p.uuid} value={p.uuid}>
+                      <option key={p.uuid} value={p.uuid}>
                         {p.display}
-                      </SelectItem>
+                      </option>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </select>
+                </div>
               </div>
             </div>
-            <DialogFooter>
+
+            <DialogFooter className="mt-4">
               <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
                 Cancel
               </Button>
@@ -210,6 +222,6 @@ export default function RolesPermissions() {
           </form>
         </DialogContent>
       </Dialog>
-    </Card>
+    </div>
   );
 }
