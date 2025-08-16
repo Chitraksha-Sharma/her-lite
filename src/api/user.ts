@@ -39,9 +39,16 @@ export async function createUser(userData: {
   username: string;
   password: string;
   // confirmPassword: string;
-  person: { uuid: string};
+  personUuid: string;
   roles: { uuid: string }[];
 }) {
+  const payload = {
+    username: userData.username,
+    password: userData.password,
+    person: userData.personUuid, // 👈 This is correct: "person" field with UUID
+    userProperties: {}, // Optional: add user properties if needed
+    roles: userData.roles,
+  };
  
   const response = await fetch(`${BASE_URL}/user`, {
     method: 'POST',
@@ -50,7 +57,7 @@ export async function createUser(userData: {
       // 'Accept': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify(userData),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
@@ -60,6 +67,36 @@ export async function createUser(userData: {
 
   return await response.json();
 }
+
+export const createRole = async (roleData: {
+  uuid?: string;
+  display: string;
+  description?: string;
+  privileges?: { uuid: string }[];
+  inheritedRoles?: { uuid: string }[];
+}) => {
+  const payload: any = {
+    displayName: roleData.display,
+    description: roleData.description || '',
+    privileges: roleData.privileges || [],
+    // Note: OpenMRS doesn't directly support "inheritedRoles" in POST — handled manually via roles
+  };
+
+  const res = await fetch('/openmrs/ws/rest/v1/role', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error?.message || 'Failed to create role');
+  }
+
+  return res.json();
+};
 
 export async function getRoles() {
   const response = await fetch(`${BASE_URL}/role`, {

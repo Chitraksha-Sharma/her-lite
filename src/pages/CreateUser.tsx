@@ -15,13 +15,14 @@ export default function CreateUser() {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    confirmPassword: '',
+    // confirmPassword: '',
     firstName: '',
     lastName: '',
     gender: 'M',
-    personUuid: '', // You'll need a person first (simplified here)
-    selectedRoles: [] as string[],
+    // personData: '', // You'll need a person first (simplified here)
+    // selectedRoles: [] as string[],
   });
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 
   useEffect(() => {
     console.log("CreateUser component loaded!");
@@ -43,7 +44,7 @@ export default function CreateUser() {
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedOptions = Array.from(e.target.selectedOptions, (opt) => opt.value);
-    setFormData((prev) => ({ ...prev, selectedRoles: selectedOptions }));
+    setSelectedRoles(selectedOptions);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,28 +54,33 @@ export default function CreateUser() {
     //   toast.error('Passwords do not match');
     //   return;
     // }
+    if (formData.password.length < 6) {
+        toast.error('Password must be at least 6 characters long');
+        return;
+      }
 
     setLoading(true);
     try {
         // Step 1: Create Person
-    const personData = await createPerson({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        gender: formData.gender,
-      });
+        const personUuid = await createPerson({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            gender: formData.gender,
+            // birthdate: null,
+          });
+      
+          if (!personUuid) {
+            throw new Error('Person creation failed: No UUID returned');
+          }
   
-      const personUuid = personData;
-      if (!personUuid) {
-        throw new Error('Person creation failed: No UUID returned');
-      }
 
       //create user with new personUuid
       await createUser({
         username: formData.username,
         password: formData.password,
         // confirmPassword: formData.password,
-        person: {uuid: formData.personUuid}, // Default "Unknown Person" (use real person picker later)
-        roles: formData.selectedRoles.map((uuid) => ({ uuid })),
+        personUuid, // Default "Unknown Person" (use real person picker later)
+        roles: selectedRoles.map((uuid) => ({ uuid })),
       });
 
       toast.success('User created successfully!');
@@ -161,7 +167,7 @@ export default function CreateUser() {
             <Label>Assign Roles</Label>
             <select
               multiple
-              value={formData.selectedRoles}
+              value={selectedRoles}
               onChange={handleRoleChange}
               className="w-full border rounded p-2 h-32"
             >
@@ -174,7 +180,7 @@ export default function CreateUser() {
           </div>
 
           {/* Hidden field for person UUID – in real app, use person picker */}
-          <input type="hidden" name="personUuid" value={formData.personUuid} />
+          {/* <input type="hidden" name="personUuid" value={formData.personUuid} /> */}
 
           <Button type="submit" disabled={loading}>
             {loading ? 'Creating...' : 'Create User'}

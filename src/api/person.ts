@@ -7,16 +7,7 @@ export const createPerson = async (personData: {
     lastName: string;
     gender: string;
   }) => {
-    const response = await fetch(`${BASE_URL}/person`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // 'Accept': 'application/json',
-        // Include auth if needed (e.g., Basic Auth or session)
-        // 'Authorization': 'Basic ' + btoa('admin:Admin123'), // replace with real auth
-      },
-      credentials: 'include',
-      body: JSON.stringify({
+    const payload = {
         names: [
           {
             givenName: personData.firstName,
@@ -24,9 +15,16 @@ export const createPerson = async (personData: {
           },
         ],
         gender: personData.gender,
-        birthdate: null, // optional
+        // birthdate: personData.birthdate || null,
         dead: false,
-      }),
+      };
+    const response = await fetch(`${BASE_URL}/person`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(payload),
     });
   
     if (!response.ok) {
@@ -34,6 +32,7 @@ export const createPerson = async (personData: {
       throw new Error(error.error?.message || 'Failed to create person');
     }
   
-    return await response.json();
+    const data = await response.json();
+    return data.uuid; // return person uuid
   };
   
