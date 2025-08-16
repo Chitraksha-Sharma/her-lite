@@ -43,41 +43,6 @@ interface TileConfig {
 }
 
 // Sample components for different subtiles (you'll replace these with actual components)
-// const ViewAllUsers: React.FC = () => (
-//   <div className="space-y-6">
-//     <h3 className="text-2xl font-semibold">All Users</h3>
-//     <Card>
-//       <CardContent className="p-6">
-//         <p>User management table will go here...</p>
-//         {/* Add your user table/grid component here */}
-//       </CardContent>
-//     </Card>
-//   </div>
-// );
-
-// const CreateUser: React.FC = () => (
-//   <div className="space-y-6">
-//     <h3 className="text-2xl font-semibold">Create New User</h3>
-//     <Card>
-//       <CardContent className="p-6">
-//         <p>User creation form will go here...</p>
-//         {/* Add your user creation form here */}
-//       </CardContent>
-//     </Card>
-//   </div>
-// );
-
-// const RolesPermissions: React.FC = () => (
-//   <div className="space-y-6">
-//     <h3 className="text-2xl font-semibold">Roles & Permissions</h3>
-//     <Card>
-//       <CardContent className="p-6">
-//         <p>Roles and permissions management will go here...</p>
-//         {/* Add your roles management component here */}
-//       </CardContent>
-//     </Card>
-//   </div>
-// );
 
 // const AuditLog: React.FC = () => (
 //   <div className="space-y-6">
@@ -98,7 +63,6 @@ const tileConfigs: Record<string, TileConfig> = {
     title: 'Users',
     description: 'Manage system users and permissions',
     icon: Users,
-    // color: 'bg-blue-500',
     subTiles: [
       {
         id: 'view-users',
@@ -154,6 +118,21 @@ const tileConfigs: Record<string, TileConfig> = {
       // Add more subtiles as needed
     ],
   },
+  visits: {
+    id: 'visits',
+    title: 'visits',
+    description: 'Patient records and information',
+    icon: UserCheck,
+    subTiles: [
+      {
+        id: 'manage visits',
+        title: 'View All Patients',
+        description: 'Browse patient records',
+        icon: UserCheck,
+        component: () => <div>Patient list component</div>,
+      }
+    ]
+  }
   // Add more tile configurations as needed
 };
 
