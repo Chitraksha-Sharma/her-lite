@@ -6,6 +6,7 @@ export const createPerson = async (personData: {
     firstName: string;
     lastName: string;
     gender: string;
+    birthdate?: string | null;
   }) => {
     const payload = {
         names: [
@@ -15,7 +16,7 @@ export const createPerson = async (personData: {
           },
         ],
         gender: personData.gender,
-        // birthdate: personData.birthdate || null,
+        birthdate: personData.birthdate || null,
         dead: false,
       };
     const response = await fetch(`${BASE_URL}/person`, {

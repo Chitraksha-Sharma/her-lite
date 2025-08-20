@@ -31,7 +31,7 @@ interface AdminTileData {
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   color?: string;
-  moduleCount?: number;
+  // moduleCount?: number;
 }
 
 
@@ -63,17 +63,17 @@ const AdminTile: React.FC<AdminTileProps> = ({ data, onClick }) => {
               </CardDescription>
             </div>
           </div>
-          {data.moduleCount && (
+          {/* {data.moduleCount && (
             <Badge variant="secondary" className="text-xs">
               {data.moduleCount} modules
             </Badge>
-          )}
+          )} */}
         </div>
       </CardHeader>
       
       <CardContent className="pt-0">
         <div className="flex items-center justify-end">
-        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+        {/* <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" /> */}
           
         </div>
       </CardContent>
@@ -101,90 +101,72 @@ const Admin: React.FC = () => {
       title: 'Users',
       description: 'Manage system users and permissions',
       icon: Users,
-      moduleCount: 4, // View Users, Create User, Roles, Audit
     },
     {
       id: 'patients',
       title: 'Patients',
       description: 'Patient records and information',
       icon: UserCheck,
-      moduleCount: 3, // View, Register, Medical History
     },
     {
       id: 'person',
       title: 'Person',
       description: 'Personnel and staff management',
       icon: UserPlus,
-      moduleCount: 2, // Staff Directory, Staff Registration
     },
     {
       id: 'visits',
       title: 'Visits',
       description: 'Patient visit tracking and history',
-      icon: Calendar,
-      moduleCount: 3, // Schedule, History, Analytics
+      icon: Calendar,     
     },
     {
       id: 'encounters',
       title: 'Encounters',
       description: 'Clinical encounters and interactions',
       icon: Stethoscope,
-      moduleCount: 4, // View, Create, Templates, Reports
     },
     {
       id: 'providers',
       title: 'Providers',
       description: 'Healthcare provider management',
       icon: Shield,
-      moduleCount: 3, // Directory, Registration, Credentials
     },
     {
       id: 'locations',
       title: 'Locations',
       description: 'Facility and location management',
       icon: MapPin,
-      // color: 'bg-teal-500',
-      moduleCount: 2, // Facilities, Room Management
     },
     {
       id: 'observations',
       title: 'Observations',
       description: 'Clinical observations and findings',
       icon: Activity,
-      // color: 'bg-cyan-500',
-      moduleCount: 3, // View, Entry, Analytics
     },
     {
       id: 'scheduler',
       title: 'Scheduler',
       description: 'Appointment and scheduling system',
       icon: Clock,
-      // color: 'bg-yellow-500',
-      moduleCount: 4, // Calendar, Appointments, Resources, Reports
     },
     {
       id: 'programs',
       title: 'Programs',
       description: 'Healthcare programs and initiatives',
       icon: FileText,
-      // color: 'bg-pink-500',
-      moduleCount: 3, // Active Programs, Enrollment, Reporting
     },
     {
       id: 'id-generation',
       title: 'ID Generation',
       description: 'Patient and entity ID management',
       icon: Database,
-      // color: 'bg-gray-500',
-      moduleCount: 2, // ID Pools, Configuration
     },
     {
       id: 'system-settings',
       title: 'System Settings',
       description: 'System configuration and preferences',
       icon: Settings,
-      // color: 'bg-slate-500',
-      moduleCount: 5, // General, Security, Integrations, Backup, Logs
     }
   ];
 

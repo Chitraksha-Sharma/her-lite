@@ -8,7 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner'; // Optional: for notifications
 
-export default function CreateUser() {
+// Define props
+interface CreateUserProps {
+  onClose?: () => void; // Optional: close modal
+  onSuccess?: () => void; // Optional: refresh data
+}
+
+const CreateUser = ({ onClose, onSuccess }: CreateUserProps) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState<{ uuid: string; display: string }[]>([]);
@@ -19,6 +25,7 @@ export default function CreateUser() {
     firstName: '',
     lastName: '',
     gender: 'M',
+    birthdate: '',
     // personData: '', // You'll need a person first (simplified here)
     // selectedRoles: [] as string[],
   });
@@ -59,6 +66,17 @@ export default function CreateUser() {
         return;
       }
 
+      // ✅ Validate birthdate is not in the future
+    if (formData.birthdate) {
+      const birthDate = new Date(formData.birthdate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (birthDate > today) {
+        toast.error('Birthdate cannot be in the future');
+        return;
+      }
+    }
+
     setLoading(true);
     try {
         // Step 1: Create Person
@@ -66,7 +84,7 @@ export default function CreateUser() {
             firstName: formData.firstName,
             lastName: formData.lastName,
             gender: formData.gender,
-            // birthdate: null,
+            birthdate: formData.birthdate || null,
           });
       
           if (!personUuid) {
@@ -84,7 +102,11 @@ export default function CreateUser() {
       });
 
       toast.success('User created successfully!');
-      navigate('/admin/users'); // Go back to users list
+      // navigate('/admin/users'); // Go back to users list
+      // ✅ Callbacks
+      onSuccess?.(); // Refresh list
+      onClose?.();   // Close modal
+
     } catch (error: any) {
       toast.error('Error: ' + (error.message || 'Unknown error'));
     } finally {
@@ -164,6 +186,15 @@ export default function CreateUser() {
             </select>
           </div>
           <div>
+            <label>Date of Birth</label>
+            <Input
+                type='date'
+                name="birthdate"
+                value={formData.birthdate}
+                onChange={handleChange}
+            />
+          </div>
+          <div>
             <Label>Assign Roles</Label>
             <select
               multiple
@@ -190,3 +221,4 @@ export default function CreateUser() {
     </Card>
   );
 }
+export default CreateUser

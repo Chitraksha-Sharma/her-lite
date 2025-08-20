@@ -40,12 +40,14 @@ export async function createUser(userData: {
   password: string;
   // confirmPassword: string;
   personUuid: string;
+  // birthdate: string;
   roles: { uuid: string }[];
 }) {
   const payload = {
     username: userData.username,
     password: userData.password,
     person: userData.personUuid, // 👈 This is correct: "person" field with UUID
+    // birthdate: userData.birthdate,
     userProperties: {}, // Optional: add user properties if needed
     roles: userData.roles,
   };
@@ -66,6 +68,21 @@ export async function createUser(userData: {
   }
 
   return await response.json();
+}
+
+export async function deleteUser(uuid: string) {
+  const response = await fetch(`${BASE_URL}/user/${uuid}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error?.message || 'Failed to delete user');
+  }
 }
 
 export const createRole = async (roleData: {
@@ -99,7 +116,7 @@ export const createRole = async (roleData: {
 };
 
 export async function getRoles() {
-  const response = await fetch(`${BASE_URL}/role`, {
+  const response = await fetch(`${BASE_URL}/role?v=full`, {
     method: 'GET',
     headers: {
       'Accept': 'application/json',
@@ -108,7 +125,8 @@ export async function getRoles() {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch roles');
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error?.message || 'Failed to fetch roles');
   }
 
   return await response.json();

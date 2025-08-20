@@ -11,17 +11,28 @@ import {
   FileText,
   UserCheck,
   Calendar,
+  CalendarPlus,
+  Bolt,
+  BookOpenText,
+  IdCard,
+  CircleEllipsis,
   Stethoscope,
   MapPin,
   Activity,
   Clock,
   Database,
-  Settings
+  Settings,
+  LucideChevronsLeftRightEllipsis
 } from "lucide-react";
-import CreateUser from './CreateUser';
+// import CreateUser from './CreateUser';
 import RolesPermissions from './RolesPermissions';
 import ViewAllUsers from './ViewAllUsers';
+import Privileges from './Privileges';
+import { Description } from '@radix-ui/react-toast';
 // import <AuditLog></AuditLog>
+import ManageVisitTypes from './ManageVisitType';
+import ManageVisitAttributeType from './ManageVisitAttributeType';
+import ConfigureVisits from './ConfigureVisits';
 
 // Define the structure for subtile data
 interface SubTileData {
@@ -71,13 +82,7 @@ const tileConfigs: Record<string, TileConfig> = {
         icon: Users,
         component: ViewAllUsers,
       },
-      {
-        id: 'create-user',
-        title: 'Create User',
-        description: 'Add new system user',
-        icon: UserPlus,
-        component: CreateUser,
-      },
+  
       {
         id: 'roles',
         title: 'Roles & Permissions',
@@ -85,6 +90,14 @@ const tileConfigs: Record<string, TileConfig> = {
         icon: Shield,
         component: RolesPermissions,
       },
+
+      {
+        id: 'privileges',
+        title: 'Privileges',
+        description: 'privileges management',
+        icon: FileText,
+        component: Privileges,
+      }
       // {
       //   id: 'audit',
       //   title: 'Audit Log',
@@ -98,7 +111,7 @@ const tileConfigs: Record<string, TileConfig> = {
     id: 'patients',
     title: 'Patients',
     description: 'Patient records and information',
-    icon: UserCheck,
+    icon: BookOpenText,
     // color: 'bg-green-500',
     subTiles: [
       {
@@ -109,30 +122,66 @@ const tileConfigs: Record<string, TileConfig> = {
         component: () => <div>Patient list component</div>,
       },
       {
-        id: 'create-patient',
-        title: 'Register Patient',
-        description: 'Add new patient',
-        icon: UserPlus,
-        component: () => <div>Patient registration form</div>,
+        id: 'Manage-Identifier',
+        title: 'Manage Identifier Types',
+        description: 'id',
+        icon: IdCard,
+        component: () => <div>Manage Identifier</div>
+      },
+      {
+        id: 'Auto-Generation',
+        title: 'Auto Generations Options',
+        description: 'autotypes',
+        icon: CircleEllipsis,
+        component: () => <div>Auto Generation</div>
       },
       // Add more subtiles as needed
+    ],
+  },
+  person: {
+    id: 'person',
+    title: 'person',
+    description: 'person details',
+    icon: Users,
+    subTiles: [
+      {
+        id: 'manage-person',
+        title: 'manage person',
+        description: 'manage all details',
+        icon: UserCheck,
+        component: () => <div>manage person</div>
+      }
     ],
   },
   visits: {
     id: 'visits',
     title: 'visits',
-    description: 'Patient records and information',
-    icon: UserCheck,
+    description: 'Manage visit types and configurations',
+    icon: Calendar,
     subTiles: [
       {
         id: 'manage visits',
-        title: 'View All Patients',
-        description: 'Browse patient records',
-        icon: UserCheck,
-        component: () => <div>Patient list component</div>,
+        title: 'Manage Visit Types',
+        description: 'Create and manage visit types',
+        icon: CalendarPlus,
+        component: ManageVisitTypes,
+      },
+      {
+        id: 'visit-attributes',
+        title: 'Manage Visit Attribute Type',
+        description: 'Define custom attributes for visits',
+        icon: CalendarPlus,
+        component: ManageVisitAttributeType,
+      },
+      {
+        id: 'configure-visits',
+        title: 'Configure Visits',
+        description: 'Configure visit behavior and automation',
+        icon: Bolt,
+        component: ConfigureVisits,
       }
-    ]
-  }
+    ],
+  },
   // Add more tile configurations as needed
 };
 
