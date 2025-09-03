@@ -9,6 +9,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Save, Camera, Upload, X, RotateCcw } from "lucide-react";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils"
+import { DayPicker, CaptionProps } from "react-day-picker"
+
 
 const PatientRegistration = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +21,6 @@ const PatientRegistration = () => {
     gender: "",
     phone: "",
     email: "",
-    // address: "",
     houseStreet: "",
     pinCode: "",
     gramPanchayat: "",
@@ -34,11 +36,62 @@ const PatientRegistration = () => {
     photo: "" // store Base64 of captured/uploaded image
   });
 
-  const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i) // last 100 years
-  const months = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-  ]
+function CustomCaption(props: any) {
+  const { displayMonth, goToMonth } = props
+  const months = Array.from({ length: 12 }).map((_, i) =>
+    new Date(0, i).toLocaleString("default", { month: "long" })
+  )
+
+  const years = Array.from(
+    { length: new Date().getFullYear() - 1900 + 1 },
+    (_, i) => 1900 + i
+  )
+
+  return (
+    <div className="flex items-center justify-center gap-2 p-2">
+      {/* Month Dropdown */}
+      <select
+        value={props.displayMonth.getMonth()}
+        onChange={(e) =>
+          props.goToMonth(
+            new Date(props.displayMonth.getFullYear(), Number(e.target.value))
+          )
+        }
+        className="border rounded p-1"
+      >
+        {months.map((month, i) => (
+          <option key={month} value={i}>
+            {month}
+          </option>
+        ))}
+      </select>
+
+      {/* Year Dropdown */}
+      <select
+        value={props.displayMonth.getFullYear()}
+        onChange={(e) =>
+          props.goToMonth(
+            new Date(Number(e.target.value), props.displayMonth.getMonth())
+          )
+        }
+        className="border rounded p-1 max-h-40 overflow-y-auto"
+      >
+        {years.map((year) => (
+          <option key={year} value={year}>
+            {year}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
+
+  // const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i) // last 100 years
+  // const months = [
+  //   "January","February","March","April","May","June",
+  //   "July","August","September","October","November","December"
+  // ]
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -46,6 +99,15 @@ const PatientRegistration = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleEmergencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedEmergencyValue = formatEmergencyNumber(e.target.value);
+    setFormData(prev => ({ ...prev, emergencyPhone: formattedEmergencyValue })); 
+  };
+
+  const formatEmergencyNumber = (value: string) => {
+    return value.replace(/\D/g, "").slice(0, 10);
   };
 
    // Phone number formatting with +91 country code
@@ -210,31 +272,39 @@ const PatientRegistration = () => {
                       required
                     />
                   </div>
+                  {/* ✅ Fixed DOB Picker */}
                   <div className="space-y-2">
                     <Label>Date of Birth *</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full justify-start text-left font-normal"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !formData.dateOfBirth && "text-muted-foreground"
+                          )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {formData.dateOfBirth ? format(formData.dateOfBirth, "PPP") : "Pick a date"}
+                          {formData.dateOfBirth
+                            ? format(formData.dateOfBirth, "PPP")
+                            : "Pick a date"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={formData.dateOfBirth}
-                          onSelect={(date) => setFormData(prev => ({ ...prev, dateOfBirth: date }))}
-                          initialFocus
-                          captionLayout="dropdown"
-                          fromYear={1900}          // 👈 set earliest year
-                          toYear={new Date().getFullYear()} 
-                        />
+                      <Calendar
+                        mode="single"
+                        selected={formData.dateOfBirth}
+                        onSelect={(date) =>
+                          setFormData((prev) => ({ ...prev, dateOfBirth: date }))
+                        }
+                        initialFocus
+                        components={{ Caption: CustomCaption }} // 👈 Use the custom dropdown caption
+                      />
+
                       </PopoverContent>
                     </Popover>
                   </div>
+  
                   <div className="space-y-2">
                     <Label>Gender *</Label>
                     <Select
@@ -465,16 +535,6 @@ const PatientRegistration = () => {
                 <p className="text-sm text-red-600">Please enter a valid email address.</p>
               )}
             </div>
-            {/* <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="address">Address</Label>
-              <Textarea
-                id="address"
-                value={formData.address}
-                onChange={(e) => handleInputChange("address", e.target.value)}
-                placeholder="Enter full address"
-                className="min-h-[80px]"
-              />
-            </div> */}
           </CardContent>
           </Card>
 
@@ -484,93 +544,95 @@ const PatientRegistration = () => {
               <CardDescription>Address details</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>House No. / Street *</Label>
-                  <Input
-                    id="houseStreet"
-                    placeholder="Enter house number and street"
-                    value={formData.houseStreet}
-                    onChange={(e) => setFormData({ ...formData, houseStreet: e.target.value })}
-                    className="border-gray-300 focus:border-blue-500"
-                    required
-                  />
-                </div>
+              <div className="space-y-2">          
+                <Label>House No. / Street *</Label>
+                <Input
+                  id="houseStreet"
+                  placeholder="Enter house number and street"
+                  value={formData.houseStreet}
+                  onChange={(e) => setFormData({ ...formData, houseStreet: e.target.value })}
+                  className="border-gray-300 focus:border-blue-500"
+                  required
+                />
+              </div>   
+              <div className="space-y-2">
+                <Label>Pin Code *</Label>
+                <Input
+                  id="pinCode"
+                  placeholder="Enter pin code"
+                  value={formData.pinCode}
+                  onChange={(e) => setFormData({ ...formData, pinCode: e.target.value })}
+                  className="border-gray-300 focus:border-blue-500"
+                  required
+                />
+              </div> 
+              <div className="space-y-2">
+                <Label>Gram Panchayat</Label>
+                <Input
+                  id="gramPanchayat"
+                  placeholder="Enter Gram Panchayat"
+                  value={formData.gramPanchayat}
+                  onChange={(e) => setFormData({ ...formData, gramPanchayat: e.target.value })}
+                  className="border-gray-300 focus:border-blue-500"
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label>Pin Code *</Label>
-                  <Input
-                    id="pinCode"
-                    placeholder="Enter pin code"
-                    value={formData.pinCode}
-                    onChange={(e) => setFormData({ ...formData, pinCode: e.target.value })}
-                    className="border-gray-300 focus:border-blue-500"
-                    required
-                  />
-                </div>
-              </div>             
+              <div className="space-y-2">
+                <Label>Tehsil</Label>
+                <Input
+                  id="tehsil"
+                  placeholder="Enter Tehsil"
+                  value={formData.tehsil}
+                  onChange={(e) => setFormData({ ...formData, tehsil: e.target.value })}
+                  className="border-gray-300 focus:border-blue-500"
+                />
+              </div>        
 
-                <div >
-                  <div className="space-y-2">
-                    <Label>Gram Panchayat</Label>
-                    <Input
-                      id="gramPanchayat"
-                      placeholder="Enter Gram Panchayat"
-                      value={formData.gramPanchayat}
-                      onChange={(e) => setFormData({ ...formData, gramPanchayat: e.target.value })}
-                      className="border-gray-300 focus:border-blue-500"
-                    />
-                  </div>
+              <div className="space-y-2">
+                <Label>City / Village *</Label>
+                <Input
+                  id="cityVillage"
+                  placeholder="Enter City or Village"
+                  value={formData.cityVillage}
+                  onChange={(e) => setFormData({ ...formData, cityVillage: e.target.value })}
+                  className="border-gray-300 focus:border-blue-500"
+                  required
+                />
+              </div>
 
-                  <div className="space-y-2">
-                    <Label>Tehsil</Label>
-                    <Input
-                      id="tehsil"
-                      placeholder="Enter Tehsil"
-                      value={formData.tehsil}
-                      onChange={(e) => setFormData({ ...formData, tehsil: e.target.value })}
-                      className="border-gray-300 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
+              <div className="space-y-2">
+                <Label>District *</Label>
+                <Input
+                  id="district"
+                  placeholder="Enter District"
+                  value={formData.district}
+                  onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                  className="border-gray-300 focus:border-blue-500"
+                  required
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label>City / Village *</Label>
-                  <Input
-                    id="cityVillage"
-                    placeholder="Enter City or Village"
-                    value={formData.cityVillage}
-                    onChange={(e) => setFormData({ ...formData, cityVillage: e.target.value })}
-                    className="border-gray-300 focus:border-blue-500"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>District *</Label>
-                    <Input
-                      id="district"
-                      placeholder="Enter District"
-                      value={formData.district}
-                      onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                      className="border-gray-300 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>State *</Label>
-                    <Input
-                      id="state"
-                      placeholder="Enter State"
-                      value={formData.state}
-                      onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                      className="border-gray-300 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-                </div>
+              <div className="space-y-2">
+                <Label>State *</Label>
+                <Input
+                  id="state"
+                  placeholder="Enter State"
+                  value={formData.state}
+                  onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                  className="border-gray-300 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Country *</Label>
+                <Input
+                  id="state"
+                  placeholder="Enter Country"
+                  value={formData.state}
+                  onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                  className="border-gray-300 focus:border-blue-500"
+                  required
+                />
               </div>
             </CardContent>
           </Card>
@@ -602,17 +664,10 @@ const PatientRegistration = () => {
                   type="tel"
                   name="emergencyPhone"
                   value={formData.emergencyPhone}
-                  onChange={handleChange}
+                  onChange={handleEmergencyChange}
                   placeholder="Enter 10-digit number"
-                  required
                 />
                 </div>
-                {/* <Input
-                  id="emergencyPhone"
-                  value={formData.emergencyPhone}
-                  onChange={(e) => handleInputChange("emergencyPhone", e.target.value)}
-                  placeholder="Enter emergency contact phone"
-                /> */}
               </div>
             </CardContent>
           </Card>
