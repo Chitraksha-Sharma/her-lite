@@ -8,13 +8,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Save } from 'lucide-react';
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-// import { Textarea } from '@/components/ui/textarea';
-// import { Calendar } from "@/components/ui/calendar";
-// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// import { format } from "date-fns";
-// import { Calendar as CalendarIcon, Save, Camera, Upload, X, RotateCcw } from "lucide-react";
-// import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 const ScheduleAppointment = () => {
     const [formData, setFormData] = useState({
         firstName: "",

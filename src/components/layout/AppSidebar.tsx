@@ -76,7 +76,7 @@ export function AppSidebar() {
         <div className="p-[7px] border-b border-primary/10">
           <div className="flex items-center gap-4">
             <div className=" rounded-lg ">
-              <img src="/logo.png" alt="Logo" className="h-6 w-6" />
+              <img src="/EHR_Logo.jpeg" alt="Logo" className="h-10 w-10 rounded-xl" />
             </div>
             {!collapsed && (
               <div>

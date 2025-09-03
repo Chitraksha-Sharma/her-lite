@@ -134,7 +134,7 @@ const LocationSector = () => {
         backgroundPosition: 'center',
       }}
     >
-      <Card className="w-full max-w-md shadow-xl border-blue-200">
+      <Card className="w-full max-w-md sm:max-w-lg  shadow-xl border-blue-200">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <MapPin className="h-12 w-12 text-primary" />
@@ -147,7 +147,7 @@ const LocationSector = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 w-full">
             {error && (
               <div className="flex items-center space-x-2 text-red-700 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
                 <AlertCircle className="h-4 w-4" />
@@ -204,6 +204,7 @@ const LocationSector = () => {
               variant="primary"
               size="lg"
               type="submit"
+              className="w-full sm:w-1/2 mx-auto"
               disabled={isLoading || isSubmitting || !location || locations.length === 0}
               text={isSubmitting ? "Selecting..." : "Continue"}
             />

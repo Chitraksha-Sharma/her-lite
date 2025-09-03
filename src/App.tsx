@@ -20,6 +20,12 @@ import LocationSector from "./pages/Location";
 import { AuthProvider } from "./api/context/AuthContext";
 import Admin from "./pages/Admin";
 import TileManagementPage from "./pages/TileManagementPage";
+import EditIdentifierSource from "./pages/EditIdentifierSource";
+import ManagePerson from "./pages/ManagePerson";
+import DetailedPersonForm from "./pages/DetailedPersonForm";
+import ManageRelationshipType from "./pages/ManageRelationshipType";
+import ManageEncounters from "./pages/ManageEncounters";
+import CreateEncounter from "./pages/CreateEncounter";
 
 
 const queryClient = new QueryClient();
@@ -113,6 +119,55 @@ const App = () => (
             <ProtectedRoute>
               <MainLayout>
                 <TileManagementPage />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/EditIdentifierSource/:uuid" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <EditIdentifierSource />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/manage-person" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ManagePerson />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/create-person" element={
+            <ProtectedRoute>
+              <MainLayout>
+              <DetailedPersonForm />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/edit-person/:uuid" element={
+            <ProtectedRoute>
+              <MainLayout>
+              <DetailedPersonForm />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/manage-relationship-type" element={
+            <ProtectedRoute>
+              <MainLayout>
+              <ManageRelationshipType />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/manage-encounters" element={
+            <ProtectedRoute>
+              <MainLayout>
+              <ManageEncounters />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/create-encounter" element={
+            <ProtectedRoute>
+              <MainLayout>
+              <CreateEncounter />
               </MainLayout>
             </ProtectedRoute>
           } />

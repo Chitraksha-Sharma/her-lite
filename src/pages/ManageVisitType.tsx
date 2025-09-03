@@ -42,7 +42,7 @@ async function createVisitType(data: { name: string; description: string }) {
 
 // 🔹 Delete Visit Type
 async function deleteVisitType(uuid: string) {
-    const res = await fetch(`${BASE_URL}/visittype/${uuid}`, {
+    const res = await fetch(`${BASE_URL}/visittype/{target_uuid}?purge=true`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

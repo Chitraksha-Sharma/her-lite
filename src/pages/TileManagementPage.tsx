@@ -16,15 +16,16 @@ import {
   BookOpenText,
   IdCard,
   CircleEllipsis,
+  FoldHorizontal,
   Stethoscope,
   MapPin,
   Activity,
   Clock,
   Database,
   Settings,
-  LucideChevronsLeftRightEllipsis
+  LucideChevronsLeftRightEllipsis,
+  Component
 } from "lucide-react";
-// import CreateUser from './CreateUser';
 import RolesPermissions from './RolesPermissions';
 import ViewAllUsers from './ViewAllUsers';
 import Privileges from './Privileges';
@@ -33,6 +34,16 @@ import { Description } from '@radix-ui/react-toast';
 import ManageVisitTypes from './ManageVisitType';
 import ManageVisitAttributeType from './ManageVisitAttributeType';
 import ConfigureVisits from './ConfigureVisits';
+import ViewAllPatients from './ViewAllPatients';
+import ManageIdentifierTypes from './ManageIdentifierTypes';
+import ManagePatientIdentifierSources from './ManagePatientIdentifierSources';
+import AutoGenerationConfiguration from './AutoGenerationConfiguration';
+import ManagePerson from './ManagePerson';
+import ManageRelationshipType from './ManageRelationshipType';
+import ManagePersonAttributeType from './ManagePersonAttributeType';
+import { title } from 'process';
+import ManageProviders from './ManageProvider';
+import ManageEncounters from './ManageEncounters';
 
 // Define the structure for subtile data
 interface SubTileData {
@@ -98,13 +109,6 @@ const tileConfigs: Record<string, TileConfig> = {
         icon: FileText,
         component: Privileges,
       }
-      // {
-      //   id: 'audit',
-      //   title: 'Audit Log',
-      //   description: 'User activity history',
-      //   icon: FileText,
-      //   component: AuditLog,
-      // },
     ],
   },
   patients: {
@@ -112,28 +116,34 @@ const tileConfigs: Record<string, TileConfig> = {
     title: 'Patients',
     description: 'Patient records and information',
     icon: BookOpenText,
-    // color: 'bg-green-500',
     subTiles: [
       {
         id: 'view-patients',
         title: 'View All Patients',
         description: 'Browse patient records',
         icon: UserCheck,
-        component: () => <div>Patient list component</div>,
+        component: ViewAllPatients,
       },
       {
         id: 'Manage-Identifier',
         title: 'Manage Identifier Types',
+        description: 'Patient Identifier Type management',
+        icon: IdCard,
+        component: ManageIdentifierTypes,
+      },
+      {
+        id: 'Manage-Patient-Identifier-Sources',
+        title: 'Manage Patient Identifier Sources',
         description: 'id',
         icon: IdCard,
-        component: () => <div>Manage Identifier</div>
+        component: ManagePatientIdentifierSources,
       },
       {
         id: 'Auto-Generation',
         title: 'Auto Generations Options',
         description: 'autotypes',
         icon: CircleEllipsis,
-        component: () => <div>Auto Generation</div>
+        component: AutoGenerationConfiguration,
       },
       // Add more subtiles as needed
     ],
@@ -149,7 +159,21 @@ const tileConfigs: Record<string, TileConfig> = {
         title: 'manage person',
         description: 'manage all details',
         icon: UserCheck,
-        component: () => <div>manage person</div>
+        component: ManagePerson,
+      },
+      {
+        id: 'manage-relationship-type',
+        title: 'Manage Relationship Type',
+        description: 'manage',
+        icon: Database,
+        component: ManageRelationshipType,
+      },
+      {
+        id: 'manage-person-attribute-type',
+        title: 'Manage Person Attribute Type',
+        description: 'manage attributes of person',
+        icon: FileText,
+        component: ManagePersonAttributeType,
       }
     ],
   },
@@ -182,6 +206,36 @@ const tileConfigs: Record<string, TileConfig> = {
       }
     ],
   },
+  providers: {
+    id: 'providers',
+    title: 'Providers',
+    description: 'Healthcare provider management',
+    icon: Shield,
+    subTiles: [
+      {
+        id: 'manage-provider',
+        title: 'Manage Providers',
+        description: 'provider management',
+        icon: UserCheck,
+        component: ManageProviders,
+      },
+    ]
+  },
+  encounters: {
+    id: 'encounters',
+    title: 'encounters',
+    description: 'Manage encounter types and roles',
+    icon : FoldHorizontal,
+    subTiles: [
+      {
+        id: 'manage-encounters',
+        title: 'Manage Encounters',
+        description: 'Encounter management',
+        icon: UserCheck,
+        component: ManageEncounters,
+      },
+    ]
+  }
   // Add more tile configurations as needed
 };
 

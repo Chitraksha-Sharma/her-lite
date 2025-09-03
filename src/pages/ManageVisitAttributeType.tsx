@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Search } from 'lucide-react';
+import { Value } from '@radix-ui/react-select';
 
 const BASE_URL = '/openmrs/ws/rest/v1';
 
@@ -40,19 +41,20 @@ async function createVisitAttributeType(data: any) {
 
  // 🔹 Mock Data Types (OpenMRS supports these)
 const DATA_TYPES = [
-    { value: 'org.openmrs.FreeText', label: 'Free Text' },
-    { value: 'org.openmrs.Concept', label: 'Concept' },
-    { value: 'org.openmrs.Patient', label: 'Patient' },
-    { value: 'org.openmrs.Provider', label: 'Provider' },
-    { value: 'org.openmrs.Location', label: 'Location' },
-    { value: 'org.openmrs.Form', label: 'Form' },
-    { value: 'org.openmrs.Order', label: 'Order' },
-    { value: 'org.openmrs.User', label: 'User' },
+    { value: 'org.openmrs.FreeText', label: 'org.openmrs.customdatatype.datatype.FreeTextDatatype' },
+    { value: 'org.openmrs.Concept', label: 'org.openmrs.customdatatype.datatype.LongFreeTextDatatype' },
+    { value: 'org.openmrs.Patient', label: 'org.openmrs.customdatatype.datatype.BooleanDatatype' },
+    // { value: 'org.openmrs.Provider', label: 'Provider' },
+    // { value: 'org.openmrs.Location', label: 'Location' },
+    // { value: 'org.openmrs.Form', label: 'Form' },
+    // { value: 'org.openmrs.Order', label: 'Order' },
+    // { value: 'org.openmrs.User', label: 'User' },
   ];
   
   // 🔹 Mock Handlers (Optional)
   const HANDLERS = [
-    { value: 'org.openmrs.web.attribute.FreeTextHandler', label: 'Free Text Handler' },
+    {Value: 'Default', Label: 'Default'},
+    { value: 'org.openmrs.web.attribute.FreeTextHandler', label: 'Default' },
     { value: 'org.openmrs.web.attribute.ConceptHandler', label: 'Concept Handler' },
   ];
 

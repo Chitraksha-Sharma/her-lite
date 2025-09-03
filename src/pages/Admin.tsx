@@ -81,9 +81,6 @@ const AdminTile: React.FC<AdminTileProps> = ({ data, onClick }) => {
   );
   };
 
-
-  
-
 // Admin Page Component
 const Admin: React.FC = () => {
   const { session } = useAuth();

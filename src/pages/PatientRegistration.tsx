@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, Save, Camera, Upload, X, RotateCcw } from "lucide-react";
+import { CalendarIcon, Save, Camera, Upload, X, RotateCcw } from "lucide-react";
 import { format } from "date-fns";
 
 const PatientRegistration = () => {
@@ -18,7 +18,14 @@ const PatientRegistration = () => {
     gender: "",
     phone: "",
     email: "",
-    address: "",
+    // address: "",
+    houseStreet: "",
+    pinCode: "",
+    gramPanchayat: "",
+    tehsil: "",
+    cityVillage: "",
+    district: "",
+    state: "",
     emergencyContact: "",
     emergencyPhone: "",
     bloodType: "",
@@ -27,6 +34,11 @@ const PatientRegistration = () => {
     photo: "" // store Base64 of captured/uploaded image
   });
 
+  const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i) // last 100 years
+  const months = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ]
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -39,16 +51,16 @@ const PatientRegistration = () => {
    // Phone number formatting with +91 country code
    const formatPhoneNumber = (value: string) => {
     // Remove all non-numeric characters
-    const numericValue = value.replace(/\D/g, "");
-    const limitedValue = numericValue.slice(0, 10);
+    const numericValue = value.replace(/\D/g, "").slice(0, 10);
+    const limitedValue = numericValue;
     
-    if (limitedValue.length > 0) {
-      return `+91 ${limitedValue}`;
-    }
-    return "";
+    // if (limitedValue.length > 0) {
+    //   return `+91 ${limitedValue}`;
+    // }
+    return limitedValue;
   };
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formattedValue = formatPhoneNumber(e.target.value);
     setFormData(prev => ({ ...prev, phone: formattedValue }));
   };
@@ -216,13 +228,17 @@ const PatientRegistration = () => {
                           selected={formData.dateOfBirth}
                           onSelect={(date) => setFormData(prev => ({ ...prev, dateOfBirth: date }))}
                           initialFocus
+                          captionLayout="dropdown"
+                          fromYear={1900}          // 👈 set earliest year
+                          toYear={new Date().getFullYear()} 
                         />
                       </PopoverContent>
                     </Popover>
                   </div>
                   <div className="space-y-2">
                     <Label>Gender *</Label>
-                    <Select onValueChange={(value) => handleInputChange("gender", value)}>
+                    <Select
+                     onValueChange={(value) => handleInputChange("gender", value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
@@ -413,42 +429,148 @@ const PatientRegistration = () => {
 
           {/* Contact Information */}
           <Card className="border-primary/20">
-            <CardHeader>
-              <CardTitle className="text-primary">Contact Information</CardTitle>
-              <CardDescription>Phone, email, and address details</CardDescription>
+          <CardHeader>
+            <CardTitle className="text-primary">Contact Information</CardTitle>
+            <CardDescription>Phone, email, and address details</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number *</Label>
+              <div className="flex">
+                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">             
+                  +91
+                </span>
+                <Input
+                id="phone"
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="Enter 10-digit number"
+                required
+              />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={handleEmailChange}
+                placeholder="example@domain.com"
+                className={formData.email && !validateEmail(formData.email) ? "border-red-500" : ""}
+              />
+              {formData.email && !validateEmail(formData.email) && (
+                <p className="text-sm text-red-600">Please enter a valid email address.</p>
+              )}
+            </div>
+            {/* <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="address">Address</Label>
+              <Textarea
+                id="address"
+                value={formData.address}
+                onChange={(e) => handleInputChange("address", e.target.value)}
+                placeholder="Enter full address"
+                className="min-h-[80px]"
+              />
+            </div> */}
+          </CardContent>
+          </Card>
+
+          <Card className="border-primary/20">
+          <CardHeader>
+              <CardTitle className="text-primary">Address</CardTitle>
+              <CardDescription>Address details</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number *</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handlePhoneChange}
-                  placeholder="Enter 10-digit number"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleEmailChange}
-                  placeholder="Enter email address"
-                />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="address">Address</Label>
-                <Textarea
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange("address", e.target.value)}
-                  placeholder="Enter full address"
-                  className="min-h-[80px]"
-                />
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>House No. / Street *</Label>
+                  <Input
+                    id="houseStreet"
+                    placeholder="Enter house number and street"
+                    value={formData.houseStreet}
+                    onChange={(e) => setFormData({ ...formData, houseStreet: e.target.value })}
+                    className="border-gray-300 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Pin Code *</Label>
+                  <Input
+                    id="pinCode"
+                    placeholder="Enter pin code"
+                    value={formData.pinCode}
+                    onChange={(e) => setFormData({ ...formData, pinCode: e.target.value })}
+                    className="border-gray-300 focus:border-blue-500"
+                    required
+                  />
+                </div>
+              </div>             
+
+                <div >
+                  <div className="space-y-2">
+                    <Label>Gram Panchayat</Label>
+                    <Input
+                      id="gramPanchayat"
+                      placeholder="Enter Gram Panchayat"
+                      value={formData.gramPanchayat}
+                      onChange={(e) => setFormData({ ...formData, gramPanchayat: e.target.value })}
+                      className="border-gray-300 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Tehsil</Label>
+                    <Input
+                      id="tehsil"
+                      placeholder="Enter Tehsil"
+                      value={formData.tehsil}
+                      onChange={(e) => setFormData({ ...formData, tehsil: e.target.value })}
+                      className="border-gray-300 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>City / Village *</Label>
+                  <Input
+                    id="cityVillage"
+                    placeholder="Enter City or Village"
+                    value={formData.cityVillage}
+                    onChange={(e) => setFormData({ ...formData, cityVillage: e.target.value })}
+                    className="border-gray-300 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>District *</Label>
+                    <Input
+                      id="district"
+                      placeholder="Enter District"
+                      value={formData.district}
+                      onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                      className="border-gray-300 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>State *</Label>
+                    <Input
+                      id="state"
+                      placeholder="Enter State"
+                      value={formData.state}
+                      onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                      className="border-gray-300 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -471,12 +593,26 @@ const PatientRegistration = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="emergencyPhone">Emergency Contact Phone</Label>
-                <Input
+                <div className="flex">
+                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">             
+                    +91
+                  </span>
+                  <Input
+                  id="emergencyPhone"
+                  type="tel"
+                  name="emergencyPhone"
+                  value={formData.emergencyPhone}
+                  onChange={handleChange}
+                  placeholder="Enter 10-digit number"
+                  required
+                />
+                </div>
+                {/* <Input
                   id="emergencyPhone"
                   value={formData.emergencyPhone}
                   onChange={(e) => handleInputChange("emergencyPhone", e.target.value)}
                   placeholder="Enter emergency contact phone"
-                />
+                /> */}
               </div>
             </CardContent>
           </Card>
@@ -490,7 +626,9 @@ const PatientRegistration = () => {
             <CardContent className="grid gap-4">
               <div className="space-y-2">
                 <Label>Blood Type</Label>
-                <Select onValueChange={(value) => handleInputChange("bloodType", value)}>
+                <Select 
+                 onValueChange={(value) => handleInputChange("bloodType", value)}
+                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select blood type" />
                   </SelectTrigger>

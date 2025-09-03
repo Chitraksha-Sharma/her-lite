@@ -7,20 +7,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 
 // Mock data (will be fetched from API in real app)
-const MOCK_VISIT_TYPES = [
-  { uuid: '1', display: 'Outpatient' },
-  { uuid: '2', display: 'Emergency' },
-  { uuid: '3', display: 'Inpatient' },
-];
+const fetchVisitTypes = async () => {
+    const res = await fetch('/openmrs/ws/rest/v1/visittype', {
+      headers: { 'Accept': 'application/json' },
+      credentials: 'include',
+    });
+    if (!res.ok) throw new Error('Failed to fetch visit types');
+    const data = await res.json();
+    return data.results || [];
+  };
 
 const HANDLERS = [
-  { value: 'org.openmrs.module.coreapps.AutomaticVisitAssignmentHandler', label: 'Automatic Visit Assignment Handler' },
-  { value: 'org.openmrs.module.emrapi.encounter.EmrEncounterVisitAssignmentHandler', label: 'EMR Encounter Visit Handler' },
-  { value: 'org.openmrs.module.coreapps.DefaultEncounterVisitAssignmentHandler', label: 'Default Handler' },
+  { value: 'org.openmrs.api.impl.visit.DefaultEncounterVisitAssignmentHandler', label: 'Assign to a suitable visit (same location, encounter date during visit) if one exists. If no suitable one exists, create a new visit' },
+  { value: 'org.openmrs.api.handler.CreateNewVisitAssignmentHandler', label: ' Assign to a suitable visit (same location, encounter date during visit) if one exists, but do not create new visits' },
+  { value: 'org.openmrs.api.handler.NoVisitAssignmentHandler', label: ' Do not automatically assign encounters to visits' },
 ];
 
 export default function ConfigureVisits() {
     const [loading, setLoading] = useState(true);
+    const [visitTypes, setVisitTypes] = useState<any[]>([]);
   
     // Form state
     const [form, setForm] = useState({
@@ -30,23 +35,27 @@ export default function ConfigureVisits() {
       encounterVisitHandler: '',
     });
 
-    // Simulate loading saved config
     useEffect(() => {
         // In real app: fetch from /ws/rest/v1/adminui/globalProperties or custom endpoint
         const loadConfig = async () => {
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
+            try{
+                const types = await fetchVisitTypes();
+                setVisitTypes(types);
 
-        // Mock saved config (replace with real API call)
-        setForm({
-            enableVisits: true,
-            autoCloseTask: false,
-            visitTypesToAutoClose: ['1'], // Outpatient
-            encounterVisitHandler: 'org.openmrs.module.coreapps.AutomaticVisitAssignmentHandler',
-        });
+                // Mock saved config (replace with real API call)
+                setForm({
+                    enableVisits: true,
+                    autoCloseTask: false,
+                    visitTypesToAutoClose: ['1'], // Outpatient
+                    encounterVisitHandler: 'org.openmrs.module.coreapps.AutomaticVisitAssignmentHandler',
+                });
+            } catch (err: any) {
+                toast.error('Load failed: ' + (err.message || 'Network error'));
+            } finally {
+                setLoading(false);
+            }
         };
         loadConfig();
-        setLoading(false);
     }, []);
 
     const handleChange = (field: string, value: any) => {
@@ -60,9 +69,6 @@ export default function ConfigureVisits() {
     const handleSave = async () => {
       // In real app: POST to a custom endpoint or update global properties
       console.log('Saving config:', form);
-    
-      // Simulate API save
-      await new Promise((resolve) => setTimeout(resolve, 800));
     
       toast.success('Visit configuration saved successfully!');
     };
@@ -111,7 +117,7 @@ export default function ConfigureVisits() {
                 <SelectValue placeholder="Select visit types..." />
               </SelectTrigger>
               <SelectContent>
-                {MOCK_VISIT_TYPES.map((type) => (
+                {visitTypes.map((type) => (
                     <SelectItem key={type.uuid} value={type.uuid}>
                     {type.display}
                     </SelectItem>
