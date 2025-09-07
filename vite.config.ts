@@ -10,8 +10,8 @@ export default defineConfig(({ mode }) => ({
     port: 8090,
     proxy: {
       // Proxy all requests starting with /openmrs to your OpenMRS server
-      '/openmrs': {
-        target: 'http://192.168.1.6:8080',
+      '/curiomed': {
+        target: 'http://192.168.1.6:8000',
         changeOrigin: true,
         secure: false,
         // Optional: Add logging to debug proxy requests

@@ -1,6 +1,7 @@
 // src/api/context/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { getSession, loginWithOpenMRS, logoutFromOpenMRS } from "../auth";
+// import { loginWithOpenMRS, logoutFromOpenMRS } from "../auth";
+import { loginApi, logoutApi } from "../auth";
 import { getUser } from "../user";
 
 // Define our own User and Session interfaces
@@ -14,6 +15,7 @@ export interface User {
 export interface SessionData {
   authenticated: boolean;
   user: User;
+  token: string;
 }
 
 interface AuthContextType {
@@ -34,26 +36,25 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<SessionData | null>(null);
+  const [session, setSession] = useState<SessionData | null>(() => {
+    try {
+      const raw = localStorage.getItem("authSession");
+      return raw ? JSON.parse(raw) as SessionData : null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [userRoles, setUserRoles] = useState<string[]>([]);
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const currentSession = await getSession();
-        if (currentSession?.authenticated) {
-          setSession(currentSession);
-          await fetchUserRoles(currentSession.user.uuid);
-        }
-      } catch (error) {
-        console.error("Error fetching session:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    init();
-  }, []);
+    // Persist session when it changes
+    if (session) {
+      localStorage.setItem("authSession", JSON.stringify(session));
+    } else {
+      localStorage.removeItem("authSession");
+    }
+  }, [session]);
 
   const fetchUserRoles = async (uuid: string) => {
     try {
@@ -75,10 +76,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
 
   const login = async (username: string, password: string) => {
+    setLoading(true);
     try {
-      const response = await loginWithOpenMRS(username, password);
+      const response = await loginApi(username, password);
       if (response?.success && response.user) {
-        setSession({ authenticated: true, user: response.user });
+        const newSession: SessionData = {
+          authenticated: true,
+          user: response.user,
+          token: response.token, // ✅ save token
+        };
+        setSession(newSession);
+        localStorage.setItem("authToken", response.token); // optional persistence
+
         await fetchUserRoles(response.user.uuid);
         return { success: true, user: response.user };
       }
@@ -91,11 +100,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await logoutFromOpenMRS();
-      setSession(null);
-      setUserRoles([]);
+      if (session?.token) {
+        await logoutApi(session.token);  // ✅ pass token
+      }
     } catch (error) {
       console.error("Logout error:", error);
+    } finally {
+      setSession(null);
+      setUserRoles([]);
+      localStorage.removeItem("authToken");
     }
   };
 

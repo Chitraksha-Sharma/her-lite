@@ -9,20 +9,123 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Save, Camera, Upload, X, RotateCcw } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils"
-import { DayPicker, CaptionProps } from "react-day-picker"
+import { cn } from "@/lib/utils";
+import { DayPicker, CaptionProps } from "react-day-picker";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { submitPatient } from "@/api/patientApi";
+// import { toast } from 'sonner'; 
 
+// const getSessionToken = () => {
+//   const session = localStorage.getItem("session");
+//   return session ? JSON.parse(session).token : null;
+// };
+
+//   function DOBPicker({ value, onChange,}: {value: Date | undefined; onChange: (date: Date | undefined) => void;}) {
+//   const [month, setMonth] = useState<Date>(value || new Date()); // 👈 control calendar view
+
+
+//   function CustomCaption({ displayMonth, onMonthChange }: CaptionProps & { onMonthChange: (month: Date) => void }) {
+//     const months = [
+//       "January","February","March","April","May","June",
+//       "July","August","September","October","November","December"
+//     ];
+//     const years = Array.from(
+//       { length: new Date().getFullYear() - 1900 + 1 },
+//       (_, i) => 1900 + i
+//     );
+
+//     return (
+//       <div className="flex justify-center gap-2 p-2">
+//         <select
+//           className="border rounded p-1"
+//           value={displayMonth.getMonth()}
+//           onChange={(e) =>
+//             onMonthChange(new Date(displayMonth.getFullYear(), Number(e.target.value)))
+//           }
+//         >
+//           {months.map((m, i) => (
+//             <option key={i} value={i}>
+//               {m}
+//             </option>
+//           ))}
+//         </select>
+
+//         <select
+//           className="border rounded p-1"
+//           value={displayMonth.getFullYear()}
+//           onChange={(e) =>
+//             onMonthChange(new Date(Number(e.target.value), displayMonth.getMonth()))
+//           }
+//         >
+//           {years.map((y) => (
+//             <option key={y} value={y}>
+//               {y}
+//             </option>
+//           ))}
+//         </select>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="space-y-2">
+//       <Label>Date of Birth *</Label>
+//       <Popover>
+//         <PopoverTrigger asChild>
+//           <Button
+//             variant="outline"
+//             className={cn(
+//               "w-full justify-start text-left font-normal",
+//               !value && "text-muted-foreground"
+//             )}
+//           >
+//             <CalendarIcon className="mr-2 h-4 w-4" />
+//             {value ? format(value, "PPP") : "Pick a date"}
+//           </Button>
+//         </PopoverTrigger>
+//         <PopoverContent className="w-auto p-0">
+//           <Calendar
+//             mode="single"
+//             selected={value}
+//             onSelect={(date) => {
+//               onChange(date);
+//               if (date) setMonth(date); 
+//             }}
+//             month={month} 
+//             onMonthChange={setMonth} 
+//             initialFocus
+//             components={{
+//               Caption: (props) => (
+//                 <CustomCaption
+//                   {...props}
+//                   onMonthChange={setMonth}
+//                 />
+//               ),
+//             }}
+//           />
+//         </PopoverContent>
+//       </Popover>
+//     </div>
+//   );
+// }
 
 const PatientRegistration = () => {
+  const [aadhaarNumber, setAadhaarNumber] = useState("");
+  const [abhaNumber, setAbhaNumber] = useState("");
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    dateOfBirth: undefined as Date | undefined,
+    dateOfBirth: "",
+    // birthdate: "",
+    // dateOfBirth: "",
     gender: "",
     phone: "",
     email: "",
     houseStreet: "",
-    pinCode: "",
+    postalCode: "",
     gramPanchayat: "",
     tehsil: "",
     cityVillage: "",
@@ -36,62 +139,46 @@ const PatientRegistration = () => {
     photo: "" // store Base64 of captured/uploaded image
   });
 
-function CustomCaption(props: any) {
-  const { displayMonth, goToMonth } = props
-  const months = Array.from({ length: 12 }).map((_, i) =>
-    new Date(0, i).toLocaleString("default", { month: "long" })
-  )
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const years = Array.from(
-    { length: new Date().getFullYear() - 1900 + 1 },
-    (_, i) => 1900 + i
-  )
+  // Format Aadhaar input: 1234-5678-9012
+  const formatAadhaar = (value: string) => {
+    const cleaned = value.replace(/\D/g, "").slice(0, 12);
+    let formatted = cleaned;
 
-  return (
-    <div className="flex items-center justify-center gap-2 p-2">
-      {/* Month Dropdown */}
-      <select
-        value={props.displayMonth.getMonth()}
-        onChange={(e) =>
-          props.goToMonth(
-            new Date(props.displayMonth.getFullYear(), Number(e.target.value))
-          )
-        }
-        className="border rounded p-1"
-      >
-        {months.map((month, i) => (
-          <option key={month} value={i}>
-            {month}
-          </option>
-        ))}
-      </select>
+    if (cleaned.length > 4) {
+      formatted = cleaned.substring(0, 4) + "-" + cleaned.substring(4);
+    }
+    if (cleaned.length > 8) {
+      formatted = formatted.substring(0, 9) + "-" + cleaned.substring(8);
+    }
 
-      {/* Year Dropdown */}
-      <select
-        value={props.displayMonth.getFullYear()}
-        onChange={(e) =>
-          props.goToMonth(
-            new Date(Number(e.target.value), props.displayMonth.getMonth())
-          )
-        }
-        className="border rounded p-1 max-h-40 overflow-y-auto"
-      >
-        {years.map((year) => (
-          <option key={year} value={year}>
-            {year}
-          </option>
-        ))}
-      </select>
-    </div>
-  )
-}
+    return formatted;
+  };
+
+  const isValidAadhaar = (value: string) => {
+    return /^\d{12}$/.test(value.replace(/-/g, ""));
+  };
+
+  const handleAadhaarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const cleaned = value.replace(/[^0-9]/g, "");
+    const formatted = formatAadhaar(cleaned);
+    setAadhaarNumber(formatted);
+  };
+
+  const isValidABHA = (value: string) => /^\d{14}$/.test(value.replace(/-/g, ""));
+
+  const handleAbhaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 14);
+    const formatted = value.length > 10
+      ? `${value.slice(0, 2)}-${value.slice(2, 6)}-${value.slice(6, 10)}-${value.slice(10)}`
+      : value;
+    setAbhaNumber(formatted);
+  };
 
 
-  // const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i) // last 100 years
-  // const months = [
-  //   "January","February","March","April","May","June",
-  //   "July","August","September","October","November","December"
-  // ]
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -103,28 +190,27 @@ function CustomCaption(props: any) {
 
   const handleEmergencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formattedEmergencyValue = formatEmergencyNumber(e.target.value);
-    setFormData(prev => ({ ...prev, emergencyPhone: formattedEmergencyValue })); 
+    setFormData((prev) => ({ ...prev, emergencyPhone: formattedEmergencyValue }));
   };
 
   const formatEmergencyNumber = (value: string) => {
     return value.replace(/\D/g, "").slice(0, 10);
   };
 
-   // Phone number formatting with +91 country code
-   const formatPhoneNumber = (value: string) => {
-    // Remove all non-numeric characters
+  // Phone number formatting with +91 country code
+  const formatPhoneNumber = (value: string) => {
     const numericValue = value.replace(/\D/g, "").slice(0, 10);
-    const limitedValue = numericValue;
-    
-    // if (limitedValue.length > 0) {
-    //   return `+91 ${limitedValue}`;
-    // }
-    return limitedValue;
+    return numericValue;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formattedValue = formatPhoneNumber(e.target.value);
-    setFormData(prev => ({ ...prev, phone: formattedValue }));
+    setFormData((prev) => ({ ...prev, phone: formattedValue }));
+  };
+
+  const handleBirthChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   // Email validation
@@ -135,29 +221,109 @@ function CustomCaption(props: any) {
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const email = e.target.value;
-    setFormData(prev => ({ ...prev, email }));
-    
-    // Optional: Add real-time validation feedback
+    setFormData((prev) => ({ ...prev, email }));
+
     if (email && !validateEmail(email)) {
       console.log("Invalid email format");
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Patient data submitted:", formData);
-    // Send formData to your backend API
+    console.log("Form submit intercepted ✅, no navigation should happen.");
+    setSubmitError(null);
+    setIsSubmitting(true);
+  
+    // Validate required fields
+    if (!formData.firstName || !formData.lastName || !formData.dateOfBirth || !formData.gender ||
+        !formData.phone || !formData.cityVillage || !formData.district || !formData.state || !formData.postalCode) {
+      setSubmitError("Please fill all required fields.");
+      setIsSubmitting(false);
+      return;
+    }
+
+     // ✅ Validate birthdate is not in the future
+     if (formData.dateOfBirth) {
+      const birthDate = new Date(formData.dateOfBirth);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if(birthDate > today){
+        toast({
+          variant: "destructive",
+          title: "Invalid Birthdate",
+          description: "Birthdate cannot be in the future.",
+        });
+        return;
+      }
+    }
+  
+    const result = await submitPatient(formData, abhaNumber, aadhaarNumber);
+  
+    if (result.success) {
+      toast({
+        title: "Success",
+        description: "Patient registered successfully!",
+      });
+      // Optionally reset form
+      // setFormData(initialState); setAadhaarNumber(""); setAbhaNumber("");
+    } else {
+      // Handle specific errors
+      switch (result.error) {
+        case "auth_token_missing":
+        case "auth_token_invalid":
+          // Only redirect to login if auth fails
+          localStorage.setItem("redirectAfterLogin", "/patient-registration");
+          navigate("/login");
+          toast({
+            title: "Session Expired",
+            description: "Please log in again.",
+            variant: "destructive",
+          });
+          break;
+  
+        case "location_not_selected":
+          // Redirect to location selection
+          toast({
+            title: "Location Required",
+            description: "Please select a location first.",
+            variant: "destructive",
+          });
+          navigate("/select-location"); // or wherever your location page is
+          break;
+  
+        case "network_error":
+          toast({
+            title: "Network Error",
+            description: "Check your connection or server status.",
+            variant: "destructive",
+          });
+          break;
+  
+        default:
+          toast({
+            title: "Error",
+            description: result.error || "Unknown error occurred.",
+            variant: "destructive",
+          });
+          setSubmitError(result.error);
+          break;
+      }
+    }
+  
+    setIsSubmitting(false);
   };
 
   // 📷 Start camera with improved device selection
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
           width: { ideal: 640 },
           height: { ideal: 480 },
-          facingMode: "user" // Prefer front camera
-        } 
+          facingMode: "user",
+        },
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -182,8 +348,7 @@ function CustomCaption(props: any) {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = canvas.toDataURL("image/jpeg", 0.8); // Use JPEG for smaller file size
-        console.log("Captured image data length:", imageData.length);
+        const imageData = canvas.toDataURL("image/jpeg", 0.8);
         setFormData((prev) => ({ ...prev, photo: imageData }));
         stopCamera();
       }
@@ -206,12 +371,11 @@ function CustomCaption(props: any) {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file size (limit to 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert("File size should be less than 5MB");
         return;
       }
-      
+
       const reader = new FileReader();
       reader.onload = () => {
         setFormData((prev) => ({ ...prev, photo: reader.result as string }));
@@ -272,43 +436,47 @@ function CustomCaption(props: any) {
                       required
                     />
                   </div>
-                  {/* ✅ Fixed DOB Picker */}
-                  <div className="space-y-2">
-                    <Label>Date of Birth *</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !formData.dateOfBirth && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {formData.dateOfBirth
-                            ? format(formData.dateOfBirth, "PPP")
-                            : "Pick a date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={formData.dateOfBirth}
-                        onSelect={(date) =>
-                          setFormData((prev) => ({ ...prev, dateOfBirth: date }))
-                        }
-                        initialFocus
-                        components={{ Caption: CustomCaption }} // 👈 Use the custom dropdown caption
-                      />
 
-                      </PopoverContent>
-                    </Popover>
+                  <div className="space-y-2">
+                    <Label htmlFor="AadhaarNumber">Aadhaar Number</Label>
+                    <Input
+                      id="aadhaar"
+                      type="text"
+                      inputMode="numeric"
+                      value={aadhaarNumber}
+                      onChange={handleAadhaarChange}
+                      maxLength={14}
+                      placeholder="Enter your aadhaar number"
+                    />
                   </div>
-  
+
+                  <div className="space-y-2">
+                    <Label htmlFor="AbhaNumber">ABHA Number</Label>
+                    <Input
+                      id="abha"
+                      type="text"
+                      inputMode="numeric"
+                      value={abhaNumber}
+                      onChange={handleAbhaChange}
+                      placeholder="Enter your abha number"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label>Date of Birth</label>
+                    <Input
+                        type='date'
+                        name="dateofBirth"
+                        value={formData.dateOfBirth}
+                        onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value }) }
+                    />
+                  </div>
+
+                  {/* <DOBPicker value={formData.dateOfBirth}onChange={(date) => setFormData((prev) => ({ ...prev, dateOfBirth: date }))}/> */}
+
                   <div className="space-y-2">
                     <Label>Gender *</Label>
-                    <Select
-                     onValueChange={(value) => handleInputChange("gender", value)}>
+                    <Select onValueChange={(value) => handleInputChange("gender", value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
@@ -336,14 +504,13 @@ function CustomCaption(props: any) {
                       </div>
                     )}
 
-                    {/* Camera Active - Improved UI */}
                     {isCameraOn && !formData.photo && (
                       <div className="relative">
                         <div className="relative overflow-hidden rounded-lg border-2 border-primary/20 bg-black">
-                          <video 
-                            ref={videoRef} 
-                            autoPlay 
-                            playsInline 
+                          <video
+                            ref={videoRef}
+                            autoPlay
+                            playsInline
                             muted
                             className="w-48 h-48 object-cover"
                             onLoadedMetadata={() => {
@@ -353,7 +520,6 @@ function CustomCaption(props: any) {
                               }
                             }}
                           />
-                          {/* Camera overlay UI */}
                           <div className="absolute inset-0 pointer-events-none">
                             <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-white/60"></div>
                             <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-white/60"></div>
@@ -361,20 +527,19 @@ function CustomCaption(props: any) {
                             <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-white/60"></div>
                           </div>
                         </div>
-                        
-                        {/* Camera Controls */}
+
                         <div className="flex justify-center items-center gap-3 mt-4">
-                          <Button 
-                            size="lg" 
+                          <Button
+                            size="lg"
                             onClick={capturePhoto}
                             className="bg-primary hover:bg-primary/90 rounded-full w-12 h-12 p-0 shadow-lg"
                             type="button"
                           >
                             <Camera className="h-5 w-5" />
                           </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={stopCamera}
                             type="button"
                             className="rounded-full"
@@ -383,8 +548,7 @@ function CustomCaption(props: any) {
                             Cancel
                           </Button>
                         </div>
-                        
-                        {/* Live preview indicator */}
+
                         <div className="flex items-center justify-center mt-2">
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
@@ -394,13 +558,12 @@ function CustomCaption(props: any) {
                       </div>
                     )}
 
-                    {/* Show captured/uploaded photo - Enhanced */}
                     {formData.photo && !isCameraOn && (
                       <div className="relative group">
                         <div className="relative overflow-hidden rounded-lg border-2 border-primary/20 shadow-md">
-                          <img 
-                            src={formData.photo} 
-                            alt="Patient Profile" 
+                          <img
+                            src={formData.photo}
+                            alt="Patient Profile"
                             className="w-48 h-48 object-cover transition-transform group-hover:scale-105"
                             onError={(e) => {
                               console.error("Image load error:", e);
@@ -408,7 +571,6 @@ function CustomCaption(props: any) {
                             }}
                             onLoad={() => console.log("Image loaded successfully")}
                           />
-                          {/* Photo overlay on hover */}
                           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <div className="text-white text-sm font-medium">Profile Photo</div>
                           </div>
@@ -426,20 +588,20 @@ function CustomCaption(props: any) {
                     )}
                   </div>
 
-                  {/* Action Buttons - Enhanced UI */}
+                  {/* Action Buttons */}
                   {!formData.photo && !isCameraOn && (
                     <div className="flex flex-col gap-3 w-full">
                       <div className="text-center">
                         <p className="text-sm text-muted-foreground mb-3">Add a profile photo</p>
                       </div>
                       <div className="flex gap-2">
-                        <Button 
+                        <Button
                           type="button"
-                          variant="outline" 
+                          variant="outline"
                           onClick={startCamera}
                           className="flex-1 h-12 border-2 border-dashed border-primary/30 hover:border-primary/50 hover:bg-primary/5 transition-all"
                         >
-                          <Camera className="h-5 w-5 mr-2 text-primary" /> 
+                          <Camera className="h-5 w-5 mr-2 text-primary" />
                           Take Photo
                         </Button>
                         <Button
@@ -499,73 +661,73 @@ function CustomCaption(props: any) {
 
           {/* Contact Information */}
           <Card className="border-primary/20">
-          <CardHeader>
-            <CardTitle className="text-primary">Contact Information</CardTitle>
-            <CardDescription>Phone, email, and address details</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number *</Label>
-              <div className="flex">
-                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">             
-                  +91
-                </span>
-                <Input
-                id="phone"
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="Enter 10-digit number"
-                required
-              />
+            <CardHeader>
+              <CardTitle className="text-primary">Contact Information</CardTitle>
+              <CardDescription>Phone, email, and address details</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number *</Label>
+                <div className="flex">
+                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">+91</span>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="Enter 10-digit number"
+                    required
+                  />
+                </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={handleEmailChange}
-                placeholder="example@domain.com"
-                className={formData.email && !validateEmail(formData.email) ? "border-red-500" : ""}
-              />
-              {formData.email && !validateEmail(formData.email) && (
-                <p className="text-sm text-red-600">Please enter a valid email address.</p>
-              )}
-            </div>
-          </CardContent>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleEmailChange}
+                  placeholder="example@domain.com"
+                  className={formData.email && !validateEmail(formData.email) ? "border-red-500" : ""}
+                />
+                {formData.email && !validateEmail(formData.email) && (
+                  <p className="text-sm text-red-600">Please enter a valid email address.</p>
+                )}
+              </div>
+            </CardContent>
           </Card>
 
           <Card className="border-primary/20">
-          <CardHeader>
+            <CardHeader>
               <CardTitle className="text-primary">Address</CardTitle>
               <CardDescription>Address details</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">          
-                <Label>House No. / Street *</Label>
+              <div className="space-y-2">
+                <Label>House No. / Street</Label>
                 <Input
                   id="houseStreet"
                   placeholder="Enter house number and street"
                   value={formData.houseStreet}
                   onChange={(e) => setFormData({ ...formData, houseStreet: e.target.value })}
                   className="border-gray-300 focus:border-blue-500"
-                  required
                 />
-              </div>   
+              </div>
               <div className="space-y-2">
-                <Label>Pin Code *</Label>
+                <Label>Postal Code *</Label>
                 <Input
-                  id="pinCode"
-                  placeholder="Enter pin code"
-                  value={formData.pinCode}
-                  onChange={(e) => setFormData({ ...formData, pinCode: e.target.value })}
+                  id="postalCode"
+                  placeholder="Enter postal code"
+                  value={formData.postalCode}
+                  onChange={(e) => {
+                    const onlyDigits = e.target.value.replace(/\D/g, "");
+                    setFormData({ ...formData, postalCode: onlyDigits });
+                  }}
                   className="border-gray-300 focus:border-blue-500"
                   required
                 />
-              </div> 
+              </div>
               <div className="space-y-2">
                 <Label>Gram Panchayat</Label>
                 <Input
@@ -576,7 +738,6 @@ function CustomCaption(props: any) {
                   className="border-gray-300 focus:border-blue-500"
                 />
               </div>
-
               <div className="space-y-2">
                 <Label>Tehsil</Label>
                 <Input
@@ -586,8 +747,7 @@ function CustomCaption(props: any) {
                   onChange={(e) => setFormData({ ...formData, tehsil: e.target.value })}
                   className="border-gray-300 focus:border-blue-500"
                 />
-              </div>        
-
+              </div>
               <div className="space-y-2">
                 <Label>City / Village *</Label>
                 <Input
@@ -599,7 +759,6 @@ function CustomCaption(props: any) {
                   required
                 />
               </div>
-
               <div className="space-y-2">
                 <Label>District *</Label>
                 <Input
@@ -611,7 +770,6 @@ function CustomCaption(props: any) {
                   required
                 />
               </div>
-
               <div className="space-y-2">
                 <Label>State *</Label>
                 <Input
@@ -626,12 +784,11 @@ function CustomCaption(props: any) {
               <div className="space-y-2">
                 <Label>Country *</Label>
                 <Input
-                  id="state"
-                  placeholder="Enter Country"
-                  value={formData.state}
-                  onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                  className="border-gray-300 focus:border-blue-500"
-                  required
+                  id="country"
+                  placeholder="India"
+                  value="India"
+                  disabled
+                  className="border-gray-300"
                 />
               </div>
             </CardContent>
@@ -656,17 +813,15 @@ function CustomCaption(props: any) {
               <div className="space-y-2">
                 <Label htmlFor="emergencyPhone">Emergency Contact Phone</Label>
                 <div className="flex">
-                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">             
-                    +91
-                  </span>
+                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">+91</span>
                   <Input
-                  id="emergencyPhone"
-                  type="tel"
-                  name="emergencyPhone"
-                  value={formData.emergencyPhone}
-                  onChange={handleEmergencyChange}
-                  placeholder="Enter 10-digit number"
-                />
+                    id="emergencyPhone"
+                    type="tel"
+                    name="emergencyPhone"
+                    value={formData.emergencyPhone}
+                    onChange={handleEmergencyChange}
+                    placeholder="Enter 10-digit number"
+                  />
                 </div>
               </div>
             </CardContent>
@@ -681,9 +836,7 @@ function CustomCaption(props: any) {
             <CardContent className="grid gap-4">
               <div className="space-y-2">
                 <Label>Blood Type</Label>
-                <Select 
-                 onValueChange={(value) => handleInputChange("bloodType", value)}
-                 >
+                <Select onValueChange={(value) => handleInputChange("bloodType", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select blood type" />
                   </SelectTrigger>
@@ -724,14 +877,20 @@ function CustomCaption(props: any) {
 
           {/* Action Buttons */}
           <div className="flex gap-4 justify-end">
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-primary hover:bg-primary/90">
+            <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
               <Save className="mr-2 h-4 w-4" />
-              Register Patient
+              {isSubmitting ? "Registering..." : "Register Patient"}
             </Button>
           </div>
+
+          {submitError && (
+            <div className="text-red-600 text-sm text-center">
+              {submitError}
+            </div>
+          )}
         </div>
       </form>
       <canvas ref={canvasRef} style={{ display: "none" }} />

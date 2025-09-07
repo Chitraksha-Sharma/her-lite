@@ -1,7 +1,8 @@
 // src/api/location.ts
 
 // Use relative path since Vite proxy will handle the routing
-const OPENMRS_BASE_URL = "/openmrs";
+// const OPENMRS_BASE_URL = "/openmrs";
+const BASE_URL = "/curiomed/v1";
 
 export interface Location {
   uuid: string;
@@ -23,14 +24,20 @@ export interface LocationApiResponse {
   error?: string;
 }
 
+function getAuthHeaders() {
+  const token = localStorage.getItem("authToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export const getLocations = async (): Promise<LocationApiResponse> => {
   try {
-    const response = await fetch(`${OPENMRS_BASE_URL}/ws/rest/v1/location`, {
+    const response = await fetch(`${BASE_URL}/location?v=default`, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        ...getAuthHeaders()
       },
-      credentials: "include", // Important for session cookies
+      // credentials: "include", // Important for session cookies
     });
 
     console.log("Locations response status:", response.status);
@@ -72,12 +79,13 @@ export const getLocations = async (): Promise<LocationApiResponse> => {
 // Get a specific location by UUID
 export const getLocationByUuid = async (uuid: string): Promise<LocationApiResponse> => {
   try {
-    const response = await fetch(`${OPENMRS_BASE_URL}/ws/rest/v1/location/${uuid}`, {
+    const response = await fetch(`${BASE_URL}/location/${uuid}`, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        ...getAuthHeaders()
       },
-      credentials: "include",
+      // credentials: "include",
     });
 
     if (!response.ok) {

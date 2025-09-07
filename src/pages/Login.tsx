@@ -17,7 +17,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { login,session } = useAuth();
+  const { login, session } = useAuth();
   useEffect(() => {
     if (session?.authenticated) {
       navigate("/location"); // or "/location" if you prefer

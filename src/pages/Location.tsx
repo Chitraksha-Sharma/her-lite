@@ -17,7 +17,7 @@ const LocationSector = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Fetch locations when component mounts
   useEffect(() => {
@@ -46,9 +46,10 @@ const LocationSector = () => {
         setIsLoading(false);
       }
     };
-
-    fetchLocations();
-  }, [navigate]);
+    if(isAuthenticated){
+      fetchLocations();
+    }
+  }, [isAuthenticated, navigate, logout]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,11 +119,11 @@ const LocationSector = () => {
     window.location.reload();
   };
 
-  if (!isAuthenticated) {
-    // Optional: redirect if not logged in
-    navigate("/login");
-    return null;
-  }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div

@@ -1,6 +1,11 @@
 import { Row } from "react-day-picker";
 
-const BASE_URL = '/openmrs/ws/rest/v1';
+const BASE_URL = "/curiomed/v1";
+
+function getAuthHeaders() {
+  const token = localStorage.getItem("authToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 // Reuse session cookie via credentials: include
 export async function getUsers() {
@@ -8,8 +13,8 @@ export async function getUsers() {
     method: 'GET',
     headers: {
       'Accept': 'application/json',
+      ...getAuthHeaders()
     },
-    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -24,8 +29,8 @@ export async function getUser(uuid: string) {
     method: 'GET',
     headers: {
       'Accept': 'application/json',
+      ...getAuthHeaders()
     },
-    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -56,9 +61,9 @@ export async function createUser(userData: {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      // 'Accept': 'application/json',
+      ...getAuthHeaders()
     },
-    credentials: 'include',
+    // credentials: 'include',
     body: JSON.stringify(payload),
   });
 
@@ -75,8 +80,9 @@ export async function deleteUser(uuid: string) {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
+      ...getAuthHeaders()
     },
-    credentials: 'include',
+    // credentials: 'include',
   });
 
   if (!response.ok) {
@@ -103,6 +109,7 @@ export const createRole = async (roleData: {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...getAuthHeaders()
     },
     body: JSON.stringify(payload),
   });
@@ -120,8 +127,9 @@ export async function getRoles() {
     method: 'GET',
     headers: {
       'Accept': 'application/json',
+      ...getAuthHeaders()
     },
-    credentials: 'include',
+    // credentials: 'include',
   });
 
   if (!response.ok) {

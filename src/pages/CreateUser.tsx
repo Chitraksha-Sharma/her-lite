@@ -141,16 +141,7 @@ const CreateUser = ({ onClose, onSuccess }: CreateUserProps) => {
             />
           </div>
 
-          {/* <div>
-            <Label>Confirm Password</Label>
-            <Input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
-          </div> */}
+
           <div>
           <Label>First Name</Label>
             <Input
