@@ -17,12 +17,16 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { login, session } = useAuth();
-  useEffect(() => {
-    if (session?.authenticated) {
-      navigate("/location"); // or "/location" if you prefer
-    }
-  }, [session, navigate]);
+  const { login, session, loading } = useAuth();
+  // useEffect(() => {
+  //   if (session && session.authenticated) {
+  //     navigate("/location"); 
+  //   }
+  // }, [session, loading, navigate]);
+
+  // if (loading) {
+  //   return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  // }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

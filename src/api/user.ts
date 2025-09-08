@@ -1,5 +1,4 @@
-import { Row } from "react-day-picker";
-
+// src/api/user.ts
 const BASE_URL = "/curiomed/v1";
 
 function getAuthHeaders() {
@@ -7,135 +6,190 @@ function getAuthHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-// Reuse session cookie via credentials: include
+/**
+ * Get all users
+ */
 export async function getUsers() {
-  const response = await fetch(`${BASE_URL}/user`, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      ...getAuthHeaders()
-    },
-  });
+  try {
+    const res = await fetch(`${BASE_URL}/user`, {
+      method: "GET",
+      headers: {
+        "Accept": "application/json",
+        ...getAuthHeaders(),
+      },
+      cache: "no-store",
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch users');
+    if (!res.ok) {
+      return { success: false, error: `Failed to fetch users: ${res.status} ${res.statusText}` };
+    }
+
+    const data = await res.json();
+    return { success: true, data };
+  } catch (err) {
+    console.error("getUsers error:", err);
+    return { success: false, error: err instanceof Error ? err.message : "Network error" };
   }
-
-  return await response.json();
 }
 
-export async function getUser(uuid: string) {
-  const response = await fetch(`${BASE_URL}/user/${uuid}`, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      ...getAuthHeaders()
-    },
-  });
+/**
+ * Get one user by uuid
+ * options.forceReload -> will set fetch cache to no-store to avoid conditional 304 responses
+ */
+export async function getUser(uuid: string, options?: { forceReload?: boolean }) {
+  try {
+    const fetchOpts: RequestInit = {
+      method: "GET",
+      headers: {
+        "Accept": "application/json",
+        ...getAuthHeaders(),
+      },
+    };
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch user');
+    if (options?.forceReload) {
+      (fetchOpts as any).cache = "no-store";
+    }
+
+    const res = await fetch(`${BASE_URL}/user/${uuid}`, fetchOpts);
+    if (!res.ok) {
+      return { success: false, error: `Failed to fetch user: ${res.status} ${res.statusText}` };
+    }
+
+    const data = await res.json();
+    return { success: true, data };
+  } catch (err) {
+    console.error("getUser error:", err);
+    return { success: false, error: err instanceof Error ? err.message : "Network error" };
   }
-
-  return await response.json();
 }
 
+/**
+ * Create user
+ */
 export async function createUser(userData: {
   username: string;
   password: string;
-  // confirmPassword: string;
   personUuid: string;
-  // birthdate: string;
   roles: { uuid: string }[];
 }) {
-  const payload = {
-    username: userData.username,
-    password: userData.password,
-    person: userData.personUuid, // 👈 This is correct: "person" field with UUID
-    // birthdate: userData.birthdate,
-    userProperties: {}, // Optional: add user properties if needed
-    roles: userData.roles,
-  };
- 
-  const response = await fetch(`${BASE_URL}/user`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthHeaders()
-    },
-    // credentials: 'include',
-    body: JSON.stringify(payload),
-  });
+  try {
+    const payload = {
+      username: userData.username,
+      password: userData.password,
+      person: userData.personUuid,
+      userProperties: {},
+      roles: userData.roles,
+    };
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.error || 'User creation failed');
+    const res = await fetch(`${BASE_URL}/user`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { success: false, error: err.error || `User creation failed: ${res.status}` };
+    }
+
+    const data = await res.json();
+    return { success: true, data };
+  } catch (err) {
+    console.error("createUser error:", err);
+    return { success: false, error: err instanceof Error ? err.message : "Network error" };
   }
-
-  return await response.json();
 }
 
+/**
+ * Delete user
+ */
 export async function deleteUser(uuid: string) {
-  const response = await fetch(`${BASE_URL}/user/${uuid}`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthHeaders()
-    },
-    // credentials: 'include',
-  });
+  try {
+    const res = await fetch(`${BASE_URL}/user/${uuid}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+    });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.error?.message || 'Failed to delete user');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { success: false, error: err.error?.message || `Failed to delete user: ${res.status}` };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("deleteUser error:", err);
+    return { success: false, error: err instanceof Error ? err.message : "Network error" };
   }
 }
 
-export const createRole = async (roleData: {
+/**
+ * Create role
+ */
+export async function createRole(roleData: {
   uuid?: string;
   name: string;
   description?: string;
   privileges?: { uuid: string }[];
   inheritedRoles?: { uuid: string }[];
-}) => {
-  const payload: any = {
-    name: roleData.name,
-    description: roleData.description || '',
-    privileges: roleData.privileges || [],
-    // Note: OpenMRS doesn't directly support "inheritedRoles" in POST — handled manually via roles
-  };
+}) {
+  try {
+    const payload: any = {
+      name: roleData.name,
+      description: roleData.description || "",
+      privileges: roleData.privileges || [],
+    };
 
-  const res = await fetch(`${BASE_URL}/role`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthHeaders()
-    },
-    body: JSON.stringify(payload),
-  });
+    const res = await fetch(`${BASE_URL}/role`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    });
 
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.error?.message || 'Failed to create role');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { success: false, error: err.error?.message || `Failed to create role: ${res.status}` };
+    }
+
+    const data = await res.json();
+    return { success: true, data };
+  } catch (err) {
+    console.error("createRole error:", err);
+    return { success: false, error: err instanceof Error ? err.message : "Network error" };
   }
+}
 
-  return res.json();
-};
-
+/**
+ * Get roles list
+ */
 export async function getRoles() {
-  const response = await fetch(`${BASE_URL}/role?v=full`, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      ...getAuthHeaders()
-    },
-    // credentials: 'include',
-  });
+  try {
+    const res = await fetch(`${BASE_URL}/role?v=full`, {
+      method: "GET",
+      headers: {
+        "Accept": "application/json",
+        ...getAuthHeaders(),
+      },
+      cache: "no-store",
+    });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.error?.message || 'Failed to fetch roles');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { success: false, error: err.error?.message || `Failed to fetch roles: ${res.status}` };
+    }
+
+    const data = await res.json();
+    return { success: true, data };
+  } catch (err) {
+    console.error("getRoles error:", err);
+    return { success: false, error: err instanceof Error ? err.message : "Network error" };
   }
-
-  return await response.json();
 }

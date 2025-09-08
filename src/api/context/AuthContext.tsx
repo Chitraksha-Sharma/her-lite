@@ -1,15 +1,32 @@
 // src/api/context/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useState } from "react";
-// import { loginWithOpenMRS, logoutFromOpenMRS } from "../auth";
-import { loginApi, logoutApi } from "../auth";
+import * as auth from "../auth"; // try auth.loginApi or auth.login (handled below)
 import { getUser } from "../user";
 
-// Define our own User and Session interfaces
+// Types
+export interface Person {
+  uuid: string;
+  display?: string;
+  links?: any[];
+  [key: string]: any;
+}
+
+export interface Role {
+  uuid?: string;
+  display?: string;
+  links?: any[];
+  [key: string]: any;
+}
+
 export interface User {
   uuid: string;
   display: string;
-  username: string;
-  // Add more OpenMRS fields if needed
+  username?: string;
+  systemId?: string;
+  userProperties?: Record<string, any>;
+  person?: Person;
+  roles?: Role[];
+  [key: string]: any;
 }
 
 export interface SessionData {
@@ -22,10 +39,7 @@ interface AuthContextType {
   session: SessionData | null;
   user: User | null;
   isAuthenticated: boolean;
-  login: (
-    username: string,
-    password: string
-  ) => Promise<{ success: boolean; error?: string; user?: User }>;
+  login: (username: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
   logout: () => Promise<void>;
   loading: boolean;
   userRoles: string[];
@@ -39,16 +53,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<SessionData | null>(() => {
     try {
       const raw = localStorage.getItem("authSession");
-      return raw ? JSON.parse(raw) as SessionData : null;
+      return raw ? (JSON.parse(raw) as SessionData) : null;
     } catch {
       return null;
     }
   });
+
   const [loading, setLoading] = useState(true);
   const [userRoles, setUserRoles] = useState<string[]>([]);
 
+  // persist session
   useEffect(() => {
-    // Persist session when it changes
     if (session) {
       localStorage.setItem("authSession", JSON.stringify(session));
     } else {
@@ -56,55 +71,105 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [session]);
 
+  // fetch roles helper
   const fetchUserRoles = async (uuid: string) => {
     try {
-      const user = await getUser(uuid);
-      console.log("Fetched user from API:", user);
-  
-      // Extract "display" field instead of "name"
-      const roleNames = (user?.roles || [])
-        .map((r: any) => r?.display?.toLowerCase?.())
-        .filter(Boolean);
-  
+      const userResp = await getUser(uuid, { forceReload: true });
+      if (!userResp.success || !userResp.data) {
+        setUserRoles([]);
+        return;
+      }
+      const fullUser = userResp.data as User;
+      const roleNames = (fullUser.roles || []).map((r: Role) => r?.display?.toLowerCase?.()).filter(Boolean) as string[];
       setUserRoles(roleNames);
-    } catch (error) {
-      console.error("Error fetching user roles:", error);
+    } catch (err) {
+      console.error("Error fetching user roles:", err);
+      setUserRoles([]);
     }
   };
-  
-  
-  
 
+  // initialize: background fetch roles if session available
+  useEffect(() => {
+    const initialize = async () => {
+      if (session?.user?.uuid) {
+        // fetch roles but don't block UI
+        fetchUserRoles(session.user.uuid).catch((e) => console.warn(e));
+      }
+      setLoading(false);
+    };
+    initialize();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // login wrapper that supports both loginApi or login from ../auth
   const login = async (username: string, password: string) => {
     setLoading(true);
     try {
-      const response = await loginApi(username, password);
+      // call whichever exists in your auth module
+      const loginFn = (auth as any).loginApi ?? (auth as any).login;
+      if (!loginFn) throw new Error("No login function found in ../auth");
+
+      const response = await loginFn(username, password);
+
       if (response?.success && response.user) {
+        // store token + minimal session
         const newSession: SessionData = {
           authenticated: true,
           user: response.user,
-          token: response.token, // ✅ save token
+          token: response.token,
         };
         setSession(newSession);
-        localStorage.setItem("authToken", response.token); // optional persistence
+        localStorage.setItem("authToken", response.token);
 
-        await fetchUserRoles(response.user.uuid);
-        return { success: true, user: response.user };
+        // Fetch full user (with person & roles) and update session if possible
+        try {
+          const fullUserResp = await getUser(response.user.uuid, { forceReload: true });
+          if (fullUserResp.success && fullUserResp.data) {
+            const updatedSession: SessionData = {
+              ...newSession,
+              user: fullUserResp.data as User,
+            };
+            setSession(updatedSession);
+            localStorage.setItem("authSession", JSON.stringify(updatedSession));
+            // fetch roles
+            await fetchUserRoles((fullUserResp.data as User).uuid);
+            return { success: true, user: fullUserResp.data as User };
+          } else {
+            // fallback: proceed with minimal user
+            await fetchUserRoles(response.user.uuid);
+            return { success: true, user: response.user };
+          }
+        } catch (err) {
+          console.warn("Failed to fetch full user after login:", err);
+          await fetchUserRoles(response.user.uuid);
+          return { success: true, user: response.user };
+        }
       }
+
+      setSession(null);
       return { success: false, error: "Invalid username or password" };
-    } catch (error) {
-      console.error("Login error:", error);
-      return { success: false, error: "An error occurred during login" };
+    } catch (err) {
+      console.error("Login error:", err);
+      setSession(null);
+      return { success: false, error: err instanceof Error ? err.message : "Login failed" };
+    } finally {
+      setLoading(false);
     }
   };
 
+  // logout wrapper
   const logout = async () => {
     try {
-      if (session?.token) {
-        await logoutApi(session.token);  // ✅ pass token
+      const logoutFn = (auth as any).logoutApi ?? (auth as any).logout;
+      if (logoutFn && session?.token) {
+        try {
+          await logoutFn(session.token);
+        } catch (e) {
+          console.warn("Server logout failed:", e);
+        }
       }
-    } catch (error) {
-      console.error("Logout error:", error);
+    } catch (err) {
+      console.error("Logout error:", err);
     } finally {
       setSession(null);
       setUserRoles([]);
@@ -114,8 +179,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const hasRole = (role: string) => userRoles.includes(role.toLowerCase());
 
-  const hasAnyRole = (roles: string[]) =>
-    roles.map((r) => r.toLowerCase()).some((role) => userRoles.includes(role));
+  const hasAnyRole = (roles: string[]) => roles.map((r) => r.toLowerCase()).some((role) => userRoles.includes(role));
 
   return (
     <AuthContext.Provider
@@ -128,7 +192,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         userRoles,
         hasRole,
-        hasAnyRole
+        hasAnyRole,
       }}
     >
       {children}

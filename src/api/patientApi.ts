@@ -2,6 +2,8 @@
 
 import { format } from "date-fns";
 
+const BASE_URL = "/curiomed/v1";
+
 export interface PatientFormData {
   firstName: string;
   lastName: string;
@@ -159,7 +161,7 @@ export const submitPatient = async (
       ],
     };
 
-    const response = await fetch("http://192.168.1.6:8000/curiomed/v1/fhir/Patient", {
+    const response = await fetch(`${BASE_URL}/curiomed/v1/fhir/Patient`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

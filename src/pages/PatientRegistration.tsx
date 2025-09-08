@@ -21,95 +21,6 @@ import { submitPatient } from "@/api/patientApi";
 //   return session ? JSON.parse(session).token : null;
 // };
 
-//   function DOBPicker({ value, onChange,}: {value: Date | undefined; onChange: (date: Date | undefined) => void;}) {
-//   const [month, setMonth] = useState<Date>(value || new Date()); // 👈 control calendar view
-
-
-//   function CustomCaption({ displayMonth, onMonthChange }: CaptionProps & { onMonthChange: (month: Date) => void }) {
-//     const months = [
-//       "January","February","March","April","May","June",
-//       "July","August","September","October","November","December"
-//     ];
-//     const years = Array.from(
-//       { length: new Date().getFullYear() - 1900 + 1 },
-//       (_, i) => 1900 + i
-//     );
-
-//     return (
-//       <div className="flex justify-center gap-2 p-2">
-//         <select
-//           className="border rounded p-1"
-//           value={displayMonth.getMonth()}
-//           onChange={(e) =>
-//             onMonthChange(new Date(displayMonth.getFullYear(), Number(e.target.value)))
-//           }
-//         >
-//           {months.map((m, i) => (
-//             <option key={i} value={i}>
-//               {m}
-//             </option>
-//           ))}
-//         </select>
-
-//         <select
-//           className="border rounded p-1"
-//           value={displayMonth.getFullYear()}
-//           onChange={(e) =>
-//             onMonthChange(new Date(Number(e.target.value), displayMonth.getMonth()))
-//           }
-//         >
-//           {years.map((y) => (
-//             <option key={y} value={y}>
-//               {y}
-//             </option>
-//           ))}
-//         </select>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="space-y-2">
-//       <Label>Date of Birth *</Label>
-//       <Popover>
-//         <PopoverTrigger asChild>
-//           <Button
-//             variant="outline"
-//             className={cn(
-//               "w-full justify-start text-left font-normal",
-//               !value && "text-muted-foreground"
-//             )}
-//           >
-//             <CalendarIcon className="mr-2 h-4 w-4" />
-//             {value ? format(value, "PPP") : "Pick a date"}
-//           </Button>
-//         </PopoverTrigger>
-//         <PopoverContent className="w-auto p-0">
-//           <Calendar
-//             mode="single"
-//             selected={value}
-//             onSelect={(date) => {
-//               onChange(date);
-//               if (date) setMonth(date); 
-//             }}
-//             month={month} 
-//             onMonthChange={setMonth} 
-//             initialFocus
-//             components={{
-//               Caption: (props) => (
-//                 <CustomCaption
-//                   {...props}
-//                   onMonthChange={setMonth}
-//                 />
-//               ),
-//             }}
-//           />
-//         </PopoverContent>
-//       </Popover>
-//     </div>
-//   );
-// }
-
 const PatientRegistration = () => {
   const [aadhaarNumber, setAadhaarNumber] = useState("");
   const [abhaNumber, setAbhaNumber] = useState("");
@@ -119,8 +30,6 @@ const PatientRegistration = () => {
     firstName: "",
     lastName: "",
     dateOfBirth: "",
-    // birthdate: "",
-    // dateOfBirth: "",
     gender: "",
     phone: "",
     email: "",

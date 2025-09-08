@@ -1,3 +1,4 @@
+// src/pages/Location.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from '@/hooks/use-toast';
@@ -7,8 +8,16 @@ import { AlertCircle, MapPin, Loader2 } from "lucide-react";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 import { getLocations, Location } from "@/api/location";
 import { getUser } from "@/api/user";
-import { getProvider } from "@/api/provider";
+import { getProviderForPerson } from "@/api/provider";
 import { useAuth } from "@/api/context/AuthContext";
+
+const BASE_URL = "/curiomed/v1";
+
+function getAuthHeaders() {
+  const token = localStorage.getItem("authToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 
 const LocationSector = () => {
   const [location, setLocation] = useState("");
@@ -19,20 +28,17 @@ const LocationSector = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
 
-  // Fetch locations when component mounts
+  // Fetch locations when component mounts (only when authenticated)
   useEffect(() => {
     const fetchLocations = async () => {
       setIsLoading(true);
       setError("");
-
       try {
         const response = await getLocations();
-
         if (response.success && response.data) {
           setLocations(response.data);
         } else {
           setError(response.error || "Failed to load locations");
-
           if (response.error?.includes("Session expired")) {
             localStorage.clear();
             navigate("/login");
@@ -46,7 +52,8 @@ const LocationSector = () => {
         setIsLoading(false);
       }
     };
-    if(isAuthenticated){
+
+    if (isAuthenticated) {
       fetchLocations();
     }
   }, [isAuthenticated, navigate, logout]);
@@ -55,58 +62,85 @@ const LocationSector = () => {
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
-
+  
     if (!location) {
       setError("Please select a location to continue.");
       setIsSubmitting(false);
       return;
     }
-
+  
     try {
-      const selectedLocation = locations.find(loc => loc.uuid === location);
-
+      const selectedLocation = locations.find((loc) => loc.uuid === location);
+  
       if (!selectedLocation) {
         setError("Selected location is invalid. Please try again.");
         setIsSubmitting(false);
         return;
       }
-
-      // Store location
-      localStorage.setItem("currentLocation", JSON.stringify({
-        uuid: selectedLocation.uuid,
-        display: selectedLocation.display
-      }));
-
-      // --- Updated user ID handling ---
-      // const userId = user?.id || user?.uuid;
-      // if (!userId) {
-      //   throw new Error("No user ID found in auth state");
-      // }
+  
+      // ✅ Save location
+      localStorage.setItem(
+        "currentLocation",
+        JSON.stringify({ uuid: selectedLocation.uuid, display: selectedLocation.display })
+      );
+  
       if (!user?.uuid) {
-        console.error("No user ID found");
-        return;
+        throw new Error("No user found in auth state");
       }
-
-      // Fetch user & provider data
-      const userData = await getUser(user.uuid);
-
+  
+      // ✅ Ensure we have full user details (with person.uuid)
+      let userData = user as any;
       if (!userData?.person?.uuid) {
-        throw new Error("No person UUID found in user data");
+        const userResp = await getUser(user.uuid, { forceReload: true });
+        if (!userResp.success || !userResp.data) {
+          throw new Error(userResp.error || "Failed to fetch user");
+        }
+        userData = userResp.data;
       }
+  
+      // if (!userData.person?.uuid) {
+      //   throw new Error("No person UUID found in user data");
+      // }
+  
+      // const providerResponse = await getProviderForPerson(userData.person.uuid);
+      // if (!providerResponse.success || !providerResponse.data) {
+      //   throw new Error(providerResponse.error || "Failed to fetch provider");
+      // }
+  
+      // const providerData = providerResponse.data;
 
-      const providerData = await getProvider(userData.person.uuid);
+      const providerUuid = userData?.provider?.uuid; // <-- optional: get provider UUID if available
+      let providerData = null;
 
-      // Store both user and provider
+      if (providerUuid) {
+        // Call provider API directly using provider UUID
+        const res = await fetch(`${BASE_URL}/provider/${providerUuid}`, {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            ...getAuthHeaders(),
+          },
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch provider: ${res.statusText}`);
+        }
+
+        providerData = await res.json();
+      }
+    
+      // ✅ Save user + provider locally
       localStorage.setItem("currentUser", JSON.stringify(userData));
-      localStorage.setItem("currentProvider", JSON.stringify(providerData));
-
+      if(providerData)localStorage.setItem("currentProvider", JSON.stringify(providerData));
+  
       toast({
-        title: 'Location selected',
+        title: "Location selected",
         description: `Welcome to ${selectedLocation.display}`,
       });
-
+  
+      // ✅ Navigate to dashboard
       navigate("/dashboard");
-
     } catch (err) {
       console.error("Error selecting location:", err);
       setError("An error occurred while selecting location.");
@@ -114,7 +148,7 @@ const LocationSector = () => {
       setIsSubmitting(false);
     }
   };
-
+  
   const handleRetry = () => {
     window.location.reload();
   };
@@ -130,9 +164,9 @@ const LocationSector = () => {
       className="min-h-screen flex items-center justify-center"
       style={{
         backgroundImage: `url('/wallpaper-login.jpg')`,
-        backgroundSize: 'cover',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center",
       }}
     >
       <Card className="w-full max-w-md sm:max-w-lg  shadow-xl border-blue-200">
@@ -142,9 +176,7 @@ const LocationSector = () => {
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-primary">Select Location</CardTitle>
-            <CardDescription className="text-gray-600">
-              Choose your working location to continue
-            </CardDescription>
+            <CardDescription className="text-gray-600">Choose your working location to continue</CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -154,11 +186,7 @@ const LocationSector = () => {
                 <AlertCircle className="h-4 w-4" />
                 <span>{error}</span>
                 {error.includes("Unable to load") && (
-                  <button
-                    type="button"
-                    onClick={handleRetry}
-                    className="ml-auto text-blue-600 hover:text-blue-800 underline text-xs"
-                  >
+                  <button type="button" onClick={handleRetry} className="ml-auto text-blue-600 hover:text-blue-800 underline text-xs">
                     Retry
                   </button>
                 )}
@@ -176,11 +204,7 @@ const LocationSector = () => {
                   <span className="ml-2 text-gray-600">Loading locations...</span>
                 </div>
               ) : (
-                <Select
-                  value={location}
-                  onValueChange={setLocation}
-                  disabled={isSubmitting || locations.length === 0}
-                >
+                <Select value={location} onValueChange={setLocation} disabled={isSubmitting || locations.length === 0}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a location" />
                   </SelectTrigger>
@@ -212,7 +236,7 @@ const LocationSector = () => {
 
             {locations.length > 0 && (
               <p className="text-xs text-gray-500 text-center">
-                {locations.length} location{locations.length !== 1 ? 's' : ''} available
+                {locations.length} location{locations.length !== 1 ? "s" : ""} available
               </p>
             )}
           </form>
