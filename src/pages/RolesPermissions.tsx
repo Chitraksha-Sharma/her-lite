@@ -518,6 +518,3 @@ export default function RolesPermissions() {
     </div>
   );
 }
-                       
-                
-              

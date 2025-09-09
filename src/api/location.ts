@@ -7,7 +7,7 @@ const BASE_URL = "/curiomed/v1";
 export interface Location {
   uuid: string;
   display: string;
-  links?: Array<{
+  links?: Array<{ 
     rel: string;
     uri: string;
     resourceAlias: string;

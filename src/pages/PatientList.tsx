@@ -34,8 +34,7 @@ const PatientList = () => {
   const [statusFilter, setStatusFilter] = useState("all");
 
   const filteredPatients = patients.filter(patient => {
-    const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         patient.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) || patient.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || patient.status.toLowerCase() === statusFilter;
     return matchesSearch && matchesStatus;
   });

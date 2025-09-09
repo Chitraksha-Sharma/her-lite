@@ -2,7 +2,8 @@
 
 import { format } from "date-fns";
 
-const BASE_URL = "/curiomed/v1";
+// const BASE_URL = "/curiomed/v1";
+const BASE_URL = import.meta.env.VITE_API_URL; 
 
 export interface PatientFormData {
   firstName: string;
@@ -32,23 +33,56 @@ export interface SubmitPatientResponse {
   error?: string;
 }
 
-// ✅ Extract token safely
+
 export const getSessionToken = (): string | null => {
-  try {
-    const session = localStorage.getItem("session");
-    if (!session) return null;
-    const parsed = JSON.parse(session);
-    return parsed.token || null;
-  } catch (error) {
-    console.error("Invalid session data in localStorage:", error);
-    return null;
-  }
-};
+    try {
+      // First try new storage (authSession / authToken)
+      const authSession = localStorage.getItem("authSession");
+      if (authSession) {
+        const parsed = JSON.parse(authSession);
+        return parsed.token || null;
+      }
+  
+      // Fallback: old session (if any)
+      const legacy = localStorage.getItem("session");
+      if (legacy) {
+        const parsed = JSON.parse(legacy);
+        return parsed.token || null;
+      }
+  
+      // As last fallback: plain token
+      return localStorage.getItem("authToken");
+    } catch (error) {
+      console.error("Invalid token in localStorage:", error);
+      return null;
+    }
+  };
+  
 
 // ✅ Check if location is selected
+// export const getSelectedLocation = (): string | null => {
+//   return localStorage.getItem("selectedLocation"); // or sessionStorage
+// };
+
 export const getSelectedLocation = (): string | null => {
-  return localStorage.getItem("selectedLocation"); // or sessionStorage
-};
+    try {
+      // ✅ First check new key
+      const stored = localStorage.getItem("selectedLocation");
+      if (stored) return stored;
+  
+      // ✅ Fallback: old format (currentLocation as JSON object)
+      const current = localStorage.getItem("currentLocation");
+      if (current) {
+        const parsed = JSON.parse(current);
+        return parsed.uuid || null;
+      }
+  
+      return null;
+    } catch (err) {
+      console.error("Error reading location:", err);
+      return null;
+    }
+  };
 
 /**
  * Submits patient data to Curiomed FHIR endpoint
@@ -146,22 +180,14 @@ export const submitPatient = async (
           ? [
               {
                 url: "http://hl7.org/fhir/StructureDefinition/patient-bloodGroup",
-                valueCodeableConcept: {
-                  coding: [
-                    {
-                      system: "http://hl7.org/fhir/bundle-type",
-                      code: formData.bloodType,
-                      display: `Blood group ${formData.bloodType}`,
-                    },
-                  ],
-                },
+                valueString: formData.bloodType,
               },
             ]
           : []),
       ],
     };
 
-    const response = await fetch(`${BASE_URL}/curiomed/v1/fhir/Patient`, {
+    const response = await fetch(`${BASE_URL}/v1/fhir/Patient`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

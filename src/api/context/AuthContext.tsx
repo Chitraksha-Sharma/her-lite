@@ -1,6 +1,6 @@
 // src/api/context/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useState } from "react";
-import * as auth from "../auth"; // try auth.loginApi or auth.login (handled below)
+import * as auth from "../auth";
 import { getUser } from "../user";
 
 // Types
@@ -72,13 +72,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [session]);
 
   // fetch roles helper
-  const fetchUserRoles = async (uuid: string) => {
+  const fetchUserRoles = async (user: User) => {
     try {
-      const userResp = await getUser(uuid, { forceReload: true });
+      console.log("Fetching roles for user:", user.uuid);
+      
+      // Check if user already has roles
+      if (user.roles && user.roles.length > 0) {
+        const roleNames = user.roles.map((r: Role) => r?.display?.toLowerCase?.()).filter(Boolean) as string[];
+        setUserRoles(roleNames);
+        return;
+      }
+      
+      // If no roles, fetch full user data
+      const userResp = await getUser(user.uuid, { forceReload: true });
       if (!userResp.success || !userResp.data) {
         setUserRoles([]);
         return;
       }
+      
       const fullUser = userResp.data as User;
       const roleNames = (fullUser.roles || []).map((r: Role) => r?.display?.toLowerCase?.()).filter(Boolean) as string[];
       setUserRoles(roleNames);
@@ -93,13 +104,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initialize = async () => {
       if (session?.user?.uuid) {
         // fetch roles but don't block UI
-        fetchUserRoles(session.user.uuid).catch((e) => console.warn(e));
+        fetchUserRoles(session.user).catch((e) => console.warn(e));
       }
       setLoading(false);
     };
     initialize();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // Only run once on mount
 
   // login wrapper that supports both loginApi or login from ../auth
   const login = async (username: string, password: string) => {
@@ -110,40 +120,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!loginFn) throw new Error("No login function found in ../auth");
 
       const response = await loginFn(username, password);
+      console.log("Login response:", response);
 
       if (response?.success && response.user) {
-        // store token + minimal session
+        // Handle potential nested results structure
+        let userData = response.user;
+        if (userData.results && Array.isArray(userData.results) && userData.results.length > 0) {
+          userData = userData.results[0];
+        }
+
+        // Validate user data
+        if (!userData.uuid) {
+          throw new Error("Invalid user data received from login");
+        }
+
+        // Create session with token + user data
         const newSession: SessionData = {
           authenticated: true,
-          user: response.user,
+          user: userData,
           token: response.token,
         };
+        
         setSession(newSession);
         localStorage.setItem("authToken", response.token);
+        localStorage.setItem("authSession", JSON.stringify(newSession));
 
-        // Fetch full user (with person & roles) and update session if possible
-        try {
-          const fullUserResp = await getUser(response.user.uuid, { forceReload: true });
-          if (fullUserResp.success && fullUserResp.data) {
-            const updatedSession: SessionData = {
-              ...newSession,
-              user: fullUserResp.data as User,
-            };
-            setSession(updatedSession);
-            localStorage.setItem("authSession", JSON.stringify(updatedSession));
-            // fetch roles
-            await fetchUserRoles((fullUserResp.data as User).uuid);
-            return { success: true, user: fullUserResp.data as User };
-          } else {
-            // fallback: proceed with minimal user
-            await fetchUserRoles(response.user.uuid);
-            return { success: true, user: response.user };
-          }
-        } catch (err) {
-          console.warn("Failed to fetch full user after login:", err);
-          await fetchUserRoles(response.user.uuid);
-          return { success: true, user: response.user };
-        }
+        // Fetch roles (this will use existing data if available)
+        await fetchUserRoles(userData);
+        
+        return { success: true, user: userData };
       }
 
       setSession(null);
@@ -174,6 +179,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(null);
       setUserRoles([]);
       localStorage.removeItem("authToken");
+      localStorage.removeItem("authSession");
+      localStorage.removeItem("currentLocation");
+      localStorage.removeItem("currentUser");
+      localStorage.removeItem("currentProvider");
     }
   };
 

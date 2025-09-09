@@ -8,7 +8,6 @@ import { AlertCircle, MapPin, Loader2 } from "lucide-react";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 import { getLocations, Location } from "@/api/location";
 import { getUser } from "@/api/user";
-import { getProviderForPerson } from "@/api/provider";
 import { useAuth } from "@/api/context/AuthContext";
 
 const BASE_URL = "/curiomed/v1";
@@ -18,15 +17,14 @@ function getAuthHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-
-const LocationSector = () => {
+const LocationSector = () => { 
   const [location, setLocation] = useState("");
   const [locations, setLocations] = useState<Location[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   // Fetch locations when component mounts (only when authenticated)
   useEffect(() => {
@@ -56,7 +54,7 @@ const LocationSector = () => {
     if (isAuthenticated) {
       fetchLocations();
     }
-  }, [isAuthenticated, navigate, logout]);
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,55 +82,84 @@ const LocationSector = () => {
         JSON.stringify({ uuid: selectedLocation.uuid, display: selectedLocation.display })
       );
   
-      if (!user?.uuid) {
-        throw new Error("No user found in auth state");
+      // ✅ Validate user data
+      if (!user) {
+        setError("User session not found. Please log in again.");
+        setIsSubmitting(false);
+        localStorage.clear();
+        navigate("/login");
+        return;
+      }
+
+      if (!user.uuid) {
+        setError("User information is invalid. Please log in again.");
+        setIsSubmitting(false);
+        localStorage.clear();
+        navigate("/login");
+        return;
       }
   
       // ✅ Ensure we have full user details (with person.uuid)
-      let userData = user as any;
+      let userData = user;
+      console.log("Initial user data:", userData);
+      
+      // Only fetch additional user data if person.uuid is missing
       if (!userData?.person?.uuid) {
-        const userResp = await getUser(user.uuid, { forceReload: true });
-        if (!userResp.success || !userResp.data) {
-          throw new Error(userResp.error || "Failed to fetch user");
+        console.log("Fetching full user details for:", user.uuid);
+        try {
+          const userResp = await getUser(user.uuid, { forceReload: true });
+          console.log("User API response:", userResp);
+          
+          if (userResp.success && userResp.data) {
+            userData = userResp.data;
+          } else {
+            console.warn("Failed to fetch full user data, continuing with available data");
+          }
+        } catch (err) {
+          console.warn("Error fetching full user data:", err);
+          // Continue with available user data
         }
-        userData = userResp.data;
       }
   
-      // if (!userData.person?.uuid) {
-      //   throw new Error("No person UUID found in user data");
-      // }
+      // Validate that we have the required user information
+      if (!userData.person?.uuid) {
+        console.warn("No person UUID found in user data, but continuing...");
+        // Don't throw error, just log warning
+      }
   
-      // const providerResponse = await getProviderForPerson(userData.person.uuid);
-      // if (!providerResponse.success || !providerResponse.data) {
-      //   throw new Error(providerResponse.error || "Failed to fetch provider");
-      // }
-  
-      // const providerData = providerResponse.data;
-
-      const providerUuid = userData?.provider?.uuid; // <-- optional: get provider UUID if available
+      // ✅ Fetch provider data (make it optional/fault-tolerant)
       let providerData = null;
+      const providerUuid = userData?.provider?.uuid;
+      console.log("Provider UUID:", providerUuid);
 
       if (providerUuid) {
-        // Call provider API directly using provider UUID
-        const res = await fetch(`${BASE_URL}/provider/${providerUuid}`, {
-          method: "GET",
-          headers: {
-            "Accept": "application/json",
-            ...getAuthHeaders(),
-          },
-          cache: "no-store",
-        });
+        try {
+          console.log("Fetching provider data...");
+          const res = await fetch(`${BASE_URL}/provider/${providerUuid}`, {
+            method: "GET",
+            headers: {
+              "Accept": "application/json",
+              ...getAuthHeaders(),
+            },
+            cache: "no-store",
+          });
 
-        if (!res.ok) {
-          throw new Error(`Failed to fetch provider: ${res.statusText}`);
+          if (res.ok) {
+            providerData = await res.json();
+            console.log("Provider data fetched successfully");
+          } else {
+            console.warn("Failed to fetch provider data:", res.status, res.statusText);
+          }
+        } catch (err) {
+          console.warn("Error fetching provider data:", err);
         }
-
-        providerData = await res.json();
       }
     
       // ✅ Save user + provider locally
       localStorage.setItem("currentUser", JSON.stringify(userData));
-      if(providerData)localStorage.setItem("currentProvider", JSON.stringify(providerData));
+      if (providerData) {
+        localStorage.setItem("currentProvider", JSON.stringify(providerData));
+      }
   
       toast({
         title: "Location selected",
@@ -140,10 +167,11 @@ const LocationSector = () => {
       });
   
       // ✅ Navigate to dashboard
+      console.log("Navigating to dashboard...");
       navigate("/dashboard");
     } catch (err) {
       console.error("Error selecting location:", err);
-      setError("An error occurred while selecting location.");
+      setError("An error occurred while selecting location: " + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setIsSubmitting(false);
     }
