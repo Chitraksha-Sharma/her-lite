@@ -9,6 +9,7 @@ import AnimatedButton from "@/components/ui/AnimatedButton";
 import { getLocations, Location } from "@/api/location";
 import { getUser } from "@/api/user";
 import { useAuth } from "@/api/context/AuthContext";
+import { getProviders } from "@/api/provider";
 
 const BASE_URL = "/curiomed/v1";
 
@@ -56,6 +57,8 @@ const LocationSector = () => {
     }
   }, [isAuthenticated, navigate]);
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -101,7 +104,7 @@ const LocationSector = () => {
   
       // ✅ Ensure we have full user details (with person.uuid)
       let userData = user;
-      console.log("Initial user data:", userData);
+      console.log("Initial user ", userData);
       
       // Only fetch additional user data if person.uuid is missing
       if (!userData?.person?.uuid) {
@@ -116,25 +119,34 @@ const LocationSector = () => {
             console.warn("Failed to fetch full user data, continuing with available data");
           }
         } catch (err) {
-          console.warn("Error fetching full user data:", err);
-          // Continue with available user data
+          console.warn("Error fetching full user ", err);
         }
       }
   
-      // Validate that we have the required user information
-      if (!userData.person?.uuid) {
-        console.warn("No person UUID found in user data, but continuing...");
-        // Don't throw error, just log warning
-      }
-  
-      // ✅ Fetch provider data (make it optional/fault-tolerant)
+      // ✅ Fetch providers data
       let providerData = null;
+      try {
+        console.log("Fetching providers...");
+        const providerResponse = await getProviders();
+        console.log("Providers API response:", providerResponse);
+        
+        if (providerResponse.success && providerResponse.data) {
+          providerData = providerResponse.data;
+        } else {
+          console.warn("Failed to fetch providers:", providerResponse.error);
+        }
+      } catch (err) {
+        console.warn("Error fetching providers:", err);
+      }
+
+      // ✅ Also fetch specific provider if user has provider UUID
+      let specificProviderData = null;
       const providerUuid = userData?.provider?.uuid;
-      console.log("Provider UUID:", providerUuid);
+      console.log("Specific Provider UUID:", providerUuid);
 
       if (providerUuid) {
         try {
-          console.log("Fetching provider data...");
+          console.log("Fetching specific provider data...");
           const res = await fetch(`${BASE_URL}/provider/${providerUuid}`, {
             method: "GET",
             headers: {
@@ -145,20 +157,23 @@ const LocationSector = () => {
           });
 
           if (res.ok) {
-            providerData = await res.json();
-            console.log("Provider data fetched successfully");
+            specificProviderData = await res.json();
+            console.log("Specific provider data fetched successfully");
           } else {
-            console.warn("Failed to fetch provider data:", res.status, res.statusText);
+            console.warn("Failed to fetch specific provider data:", res.status, res.statusText);
           }
         } catch (err) {
-          console.warn("Error fetching provider data:", err);
+          console.warn("Error fetching specific provider:", err);
         }
       }
     
       // ✅ Save user + provider locally
       localStorage.setItem("currentUser", JSON.stringify(userData));
-      if (providerData) {
-        localStorage.setItem("currentProvider", JSON.stringify(providerData));
+      if (specificProviderData) {
+        localStorage.setItem("currentProvider", JSON.stringify(specificProviderData));
+      } else if (providerData && providerData.length > 0) {
+        // Fallback to first provider if specific provider not found
+        localStorage.setItem("currentProvider", JSON.stringify(providerData[0]));
       }
   
       toast({
@@ -176,6 +191,10 @@ const LocationSector = () => {
       setIsSubmitting(false);
     }
   };
+
+
+
+
   
   const handleRetry = () => {
     window.location.reload();

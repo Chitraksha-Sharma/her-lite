@@ -50,7 +50,7 @@ export async function getUser(uuid: string, options?: { forceReload?: boolean })
       (fetchOpts as any).cache = "no-store";
     }
 
-    const res = await fetch(`${BASE_URL}/user?q=${uuid}`, fetchOpts);
+    const res = await fetch(`${BASE_URL}/user/${uuid}`, fetchOpts);
     if (!res.ok) {
       return { success: false, error: `Failed to fetch user: ${res.status} ${res.statusText}` };
     }

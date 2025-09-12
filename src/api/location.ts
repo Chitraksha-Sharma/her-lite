@@ -2,7 +2,9 @@
 
 // Use relative path since Vite proxy will handle the routing
 // const OPENMRS_BASE_URL = "/openmrs";
-const BASE_URL = "/curiomed/v1";
+// const BASE_URL = "/curiomed/v1";
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 
 export interface Location {
   uuid: string;
@@ -31,7 +33,7 @@ function getAuthHeaders() {
 
 export const getLocations = async (): Promise<LocationApiResponse> => {
   try {
-    const response = await fetch(`${BASE_URL}/location?v=default`, {
+    const response = await fetch(`${BASE_URL}/v1/location?v=default`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -79,7 +81,7 @@ export const getLocations = async (): Promise<LocationApiResponse> => {
 // Get a specific location by UUID
 export const getLocationByUuid = async (uuid: string): Promise<LocationApiResponse> => {
   try {
-    const response = await fetch(`${BASE_URL}/location/${uuid}`, {
+    const response = await fetch(`${BASE_URL}/v1/location/${uuid}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

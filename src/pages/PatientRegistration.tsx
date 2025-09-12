@@ -26,7 +26,7 @@ const PatientRegistration = () => {
   const [abhaNumber, setAbhaNumber] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const emptyFormData = {
     firstName: "",
     lastName: "",
     dateOfBirth: "",
@@ -45,8 +45,32 @@ const PatientRegistration = () => {
     bloodType: "",
     allergies: "",
     medicalHistory: "",
-    photo: "" // store Base64 of captured/uploaded image
-  });
+    photo: "",
+  };
+  
+  const [formData, setFormData] = useState(emptyFormData);
+  
+  // const [formData, setFormData] = useState({
+  //   firstName: "",
+  //   lastName: "",
+  //   dateOfBirth: "",
+  //   gender: "",
+  //   phone: "",
+  //   email: "",
+  //   houseStreet: "",
+  //   postalCode: "",
+  //   gramPanchayat: "",
+  //   tehsil: "",
+  //   cityVillage: "",
+  //   district: "",
+  //   state: "",
+  //   emergencyContact: "",
+  //   emergencyPhone: "",
+  //   bloodType: "",
+  //   allergies: "",
+  //   medicalHistory: "",
+  //   photo: "" // store Base64 of captured/uploaded image
+  // });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -175,8 +199,13 @@ const PatientRegistration = () => {
         title: "Success",
         description: "Patient registered successfully!",
       });
-      // Optionally reset form
-      // setFormData(initialState); setAadhaarNumber(""); setAbhaNumber("");
+
+      // ✅ Reset form
+      setFormData(emptyFormData);
+      setAadhaarNumber("");
+      setAbhaNumber("");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setIsCameraOn(false);
     } else {
       // Handle specific errors
       switch (result.error) {
@@ -745,7 +774,7 @@ const PatientRegistration = () => {
             <CardContent className="grid gap-4">
               <div className="space-y-2">
                 <Label>Blood Type</Label>
-                <Select onValueChange={(value) => handleInputChange("bloodType", value)}>
+                <Select value={formData.bloodType} onValueChange={(value) => handleInputChange("bloodType", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select blood type" />
                   </SelectTrigger>

@@ -29,6 +29,7 @@ import {
 
 import { useAuth } from "../../api/context/AuthContext";
 import { useAdminAccess } from "@/lib/roleUtils";
+import { title } from "process";
 
 
 const navigationItems = [
@@ -40,6 +41,7 @@ const navigationItems = [
   { title: "Laboratory", url: "/laboratory", icon: TestTube },
   { title: "Pharmacy", url: "/pharmacy", icon: Pill },
   { title: "Settings", url: "/settings", icon: Settings },
+  { title: "ABHA", url: "/abha", icon: Users },
 ];
 
 // Admin item is now separate and conditionally rendered

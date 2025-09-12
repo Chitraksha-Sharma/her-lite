@@ -5,12 +5,32 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Save, User } from 'lucide-react';
+import { User, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate, useParams } from 'react-router-dom';
-import { createPerson } from '@/api/person'; // Import the createPerson function
+import { getPersonById, deletePerson, updatePersonName, updatePersonGenderAndBirthdate, updatePersonAddress } from '@/api/person';
 
-export default function DetailedPersonForm() {
+// --- Types ---
+type Name = {
+  uuid?: string;
+  givenName: string;
+  middleName?: string;
+  familyName?: string;
+  preferred: boolean;
+};
+
+type Address = {
+  uuid?: string;
+  preferred: boolean;
+  address1: string;
+  address2: string;
+  cityVillage: string;
+  stateProvince: string;
+  country: string;
+  postalCode: string;
+};
+
+export default function UpdatePerson() {
   const { uuid } = useParams<{ uuid: string }>();
   const navigate = useNavigate();
 
@@ -19,10 +39,10 @@ export default function DetailedPersonForm() {
   const [deleteReason, setDeleteReason] = useState('');
 
   // Form state
-  const [names, setNames] = useState([
+  const [names, setNames] = useState<Name[]>([
     { givenName: '', middleName: '', familyName: '', preferred: true },
   ]);
-  const [addresses, setAddresses] = useState([
+  const [addresses, setAddresses] = useState<Address[]>([
     {
       preferred: true,
       address1: '',
@@ -43,104 +63,119 @@ export default function DetailedPersonForm() {
     causeOfDeath: '',
   });
 
-  // Load person if editing (removed API calls)
+  // Load person data when component mounts or UUID changes
   useEffect(() => {
     if (!uuid) {
       setLoading(false);
       return;
     }
-    
-    // For editing, you might want to load from local state or props
-    // Since we removed fetch API, just set loading to false
-    setLoading(false);
+
+    const loadPersonData = async () => {
+      try {
+        setLoading(true);
+        const response = await getPersonById(uuid);
+
+        if (response.success && response.data) {
+          const p = response.data;
+
+          // ✅ Map names
+          if (p.preferredName) {
+            setNames([
+              {
+                uuid: p.preferredName.uuid,
+                givenName: p.preferredName.givenName || '',
+                middleName: p.preferredName.middleName || '',
+                familyName: p.preferredName.familyName || '',
+                preferred: true,
+              },
+            ]);
+          }
+
+          // ✅ Map addresses
+          if (p.preferredAddress) {
+            setAddresses([
+              {
+                uuid: p.preferredAddress.uuid,
+                preferred: true,
+                address1: p.preferredAddress.address1 || '',
+                address2: p.preferredAddress.address2 || '',
+                cityVillage: p.preferredAddress.cityVillage || '',
+                stateProvince: p.preferredAddress.stateProvince || '',
+                country: p.preferredAddress.country || '',
+                postalCode: p.preferredAddress.postalCode || '',
+              },
+            ]);
+          }
+
+          // ✅ General info
+          setPerson({
+            gender: p.gender || 'M',
+            birthdate: p.birthdate?.split('T')[0] || '',
+            birthdateEstimated: p.birthdateEstimated || false,
+            dead: p.dead || p.voided || false,
+            deathDate: p.deathDate ? p.deathDate.split('T')[0] : '',
+            deathDateEstimated: p.deathdateEstimated || false,
+            causeOfDeath: p.causeOfDeath || '',
+          });
+        } else {
+          throw new Error(response.error || 'Failed to load person data');
+        }
+      } catch (error: any) {
+        toast.error('Failed to load person: ' + (error.message || 'Unknown error'));
+        navigate('/admin/person');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPersonData();
   }, [uuid, navigate]);
 
-  // Handle Name Changes
+  // Handlers for form changes
   const updateName = (index: number, field: string, value: any) => {
     const newNames = [...names];
     (newNames[index] as any)[field] = value;
     setNames(newNames);
   };
 
-  const addName = () => {
-    setNames([
-      ...names,
-      { givenName: '', middleName: '', familyName: '', preferred: false },
-    ]);
-  };
-
-  // Handle Address Changes
   const updateAddress = (index: number, field: string, value: any) => {
     const newAddresses = [...addresses];
     (newAddresses[index] as any)[field] = value;
     setAddresses(newAddresses);
   };
 
-  const addAddress = () => {
-    setAddresses([
-      ...addresses,
-      {
-        preferred: false,
-        address1: '',
-        address2: '',
-        cityVillage: '',
-        stateProvince: '',
-        country: '',
-        postalCode: '',
-      },
-    ]);
-  };
-
-  // Handle Person Info
   const handlePersonChange = (field: string, value: any) => {
     setPerson((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Validate & Save using only createPerson API
- const handleSave = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  const validName = names.some((n) => n.givenName.trim());
-  if (!validName) {
-    toast.error('At least one name must have a Given Name');
-    return;
-  }
-
-  if (!person.birthdate) {
-    toast.error('Birthdate is required');
-    return;
-  }
-
-  try {
-    // Prepare person data for createPerson API
-    const personData = {
-      firstName: names.find(n => n.givenName.trim())?.givenName || names[0].givenName || '',
-      lastName: names.find(n => n.familyName?.trim())?.familyName || names[0].familyName || '',
-      gender: person.gender,
-      birthdate: person.birthdate || null,
-      address: addresses[0] && (addresses[0].address1 || addresses[0].cityVillage) ? {
-        address1: addresses[0].address1 || undefined,
-        cityVillage: addresses[0].cityVillage || undefined,
-        country: addresses[0].country || undefined,
-        postalCode: addresses[0].postalCode || undefined,
-      } : null,
-    };
-
-    // Call createPerson from Person.ts - now with consistent API pattern!
-    const result = await createPerson(personData);
-
-    if (result.success) {
-      toast.success('Person created successfully!');
-      navigate('/admin/manage-person');
-    } else {
-      throw new Error(result.error);
+  // --- API Button Handlers ---
+  const handleUpdateName = async () => {
+    if (!names[0]?.uuid) {
+      toast.error("No name UUID found for update");
+      return;
     }
-  } catch (error: any) {
-    toast.error('Save failed: ' + (error.message || 'Server error'));
-  }
-};
+    const res = await updatePersonName(uuid!, names[0].uuid, names[0]);
+    if (res.success) toast.success("Name updated successfully!");
+    else toast.error(res.error);
+  };
 
-  // Handle Delete (removed API call)
+  const handleUpdateAddress = async () => {
+    if (!addresses[0]?.uuid) {
+      toast.error("No address UUID found for update");
+      return;
+    }
+    const res = await updatePersonAddress(uuid!, addresses[0].uuid, addresses[0]);
+    if (res.success) toast.success("Address updated successfully!");
+    else toast.error(res.error);
+  };
+
+  const handleUpdateGenderAndBirthdate = async () => {
+    const res = await updatePersonGenderAndBirthdate(uuid!, person);
+    if (res.success) toast.success("Person info updated successfully!");
+    else toast.error(res.error);
+  };
+
+  // Delete person
   const handleDelete = async () => {
     if (!uuid) return;
     if (!deleteReason.trim()) {
@@ -150,18 +185,29 @@ export default function DetailedPersonForm() {
 
     if (!confirm('Delete this person forever? This cannot be undone.')) return;
 
-    // Since we removed delete API, just show a message
-    toast.success('Delete functionality removed for demo');
-    navigate('/admin/manage-person');
+    setDeleting(true);
+    try {
+      const response = await deletePerson(uuid);
+
+      if (response.success) {
+        toast.success('Person deleted successfully!');
+        navigate('/admin/manage-person');
+      } else {
+        throw new Error(response.error || 'Failed to delete person');
+      }
+    } catch (error: any) {
+      toast.error('Delete failed: ' + (error.message || 'Server error'));
+    } finally {
+      setDeleting(false);
+    }
   };
 
-  if (loading) return <p className="p-4">Loading...</p>;
+  if (loading) return <p className="p-4">Loading person data...</p>;
 
-  // Remove edit functionality since we only support creation
-  if (uuid) {
+  if (!uuid) {
     return (
       <div className="p-6">
-        <p>Editing not supported in this version. Please create a new person.</p>
+        <p>No person selected for editing.</p>
         <Button onClick={() => navigate('/admin/person')}>Back to List</Button>
       </div>
     );
@@ -174,12 +220,12 @@ export default function DetailedPersonForm() {
           <User className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-primary">Create Person</h1>
-          <p className="text-muted-foreground">Create new person in the system</p>
+          <h1 className="text-3xl font-bold text-primary">Update Person</h1>
+          <p className="text-muted-foreground">Edit person details (ID: {uuid})</p>
         </div>
       </div>
 
-      <form onSubmit={handleSave}>
+      <form>
         <div className="grid gap-6">
           {/* Personal Information */}
           <Card className="border-primary/20">
@@ -193,7 +239,10 @@ export default function DetailedPersonForm() {
                 <div>
                   <h3 className="text-lg font-medium mb-4">Names</h3>
                   {names.map((name, index) => (
-                    <div key={index} className="space-y-3 p-4 border rounded-md mb-4 bg-gray-50">
+                    <div
+                      key={index}
+                      className="space-y-3 p-4 border rounded-md mb-4 bg-gray-50"
+                    >
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id={`preferred-name-${index}`}
@@ -230,7 +279,7 @@ export default function DetailedPersonForm() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor={`familyName-${index}`}>Family Name *</Label>
+                          <Label htmlFor={`familyName-${index}`}>Family Name</Label>
                           <Input
                             id={`familyName-${index}`}
                             value={name.familyName}
@@ -238,27 +287,28 @@ export default function DetailedPersonForm() {
                               updateName(index, 'familyName', e.target.value)
                             }
                             placeholder="Optional"
-                            required
                           />
                         </div>
                       </div>
                     </div>
                   ))}
-                  <Button type="button" variant="outline" onClick={addName}>
-                    + Add New Name
+                  <Button type="button" variant="outline" onClick={handleUpdateName}>
+                    Update Name
                   </Button>
                 </div>
 
                 {/* General Person Info */}
                 <div>
                   <h3 className="text-lg font-medium mb-4">General Information</h3>
-                  <div className="space-y-6 p-4 border rounded-md bg-gray-50">
+                  <div className="space-y-6 p-4 border rounded-md mb-4 bg-gray-50">
                     {/* Gender */}
                     <div className="space-y-2">
                       <Label>Gender *</Label>
-                      <Select 
-                        value={person.gender} 
-                        onValueChange={(value) => handlePersonChange('gender', value)}
+                      <Select
+                        value={person.gender}
+                        onValueChange={(value) =>
+                          handlePersonChange('gender', value)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select gender" />
@@ -266,6 +316,7 @@ export default function DetailedPersonForm() {
                         <SelectContent>
                           <SelectItem value="M">Male</SelectItem>
                           <SelectItem value="F">Female</SelectItem>
+                          <SelectItem value="O">Other</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -278,7 +329,9 @@ export default function DetailedPersonForm() {
                           id="birthdate"
                           type="date"
                           value={person.birthdate}
-                          onChange={(e) => handlePersonChange('birthdate', e.target.value)}
+                          onChange={(e) =>
+                            handlePersonChange('birthdate', e.target.value)
+                          }
                           required
                         />
                       </div>
@@ -301,7 +354,9 @@ export default function DetailedPersonForm() {
                       <Checkbox
                         id="dead"
                         checked={person.dead}
-                        onCheckedChange={(checked) => handlePersonChange('dead', checked)}
+                        onCheckedChange={(checked) =>
+                          handlePersonChange('dead', checked)
+                        }
                       />
                       <Label htmlFor="dead">Deceased?</Label>
                     </div>
@@ -315,7 +370,9 @@ export default function DetailedPersonForm() {
                               id="deathDate"
                               type="date"
                               value={person.deathDate}
-                              onChange={(e) => handlePersonChange('deathDate', e.target.value)}
+                              onChange={(e) =>
+                                handlePersonChange('deathDate', e.target.value)
+                              }
                             />
                           </div>
                           <div className="flex items-end">
@@ -331,19 +388,23 @@ export default function DetailedPersonForm() {
                             </div>
                           </div>
                         </div>
-
                         <div className="space-y-2">
                           <Label htmlFor="causeOfDeath">Cause of Death</Label>
                           <Input
                             id="causeOfDeath"
                             value={person.causeOfDeath}
-                            onChange={(e) => handlePersonChange('causeOfDeath', e.target.value)}
+                            onChange={(e) =>
+                              handlePersonChange('causeOfDeath', e.target.value)
+                            }
                             placeholder="Optional"
                           />
                         </div>
                       </div>
                     )}
                   </div>
+                  <Button type="button" variant="outline" onClick={handleUpdateGenderAndBirthdate}>
+                    Update Gender & Birthdate
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -357,7 +418,10 @@ export default function DetailedPersonForm() {
             </CardHeader>
             <CardContent>
               {addresses.map((addr, index) => (
-                <div key={index} className="space-y-3 p-4 border rounded-md mb-4 bg-gray-50">
+                <div
+                  key={index}
+                  className="space-y-3 p-4 border rounded-md mb-4 bg-gray-50"
+                >
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id={`preferred-addr-${index}`}
@@ -370,7 +434,7 @@ export default function DetailedPersonForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={`address1-${index}`}>Address *</Label>
+                    <Label htmlFor={`address1-${index}`}>Address</Label>
                     <Input
                       id={`address1-${index}`}
                       value={addr.address1}
@@ -378,7 +442,6 @@ export default function DetailedPersonForm() {
                         updateAddress(index, 'address1', e.target.value)
                       }
                       placeholder="Street, Building, etc."
-                      required
                     />
                   </div>
 
@@ -396,14 +459,13 @@ export default function DetailedPersonForm() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor={`city-${index}`}>City/Village *</Label>
+                      <Label htmlFor={`city-${index}`}>City/Village</Label>
                       <Input
                         id={`city-${index}`}
                         value={addr.cityVillage}
                         onChange={(e) =>
                           updateAddress(index, 'cityVillage', e.target.value)
                         }
-                        required
                       />
                     </div>
                     <div className="space-y-2">
@@ -439,20 +501,50 @@ export default function DetailedPersonForm() {
                   </div>
                 </div>
               ))}
-              <Button type="button" variant="outline" onClick={addAddress}>
-                + Add New Address
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleUpdateAddress}
+              >
+                Update Address
               </Button>
             </CardContent>
           </Card>
 
-          {/* Save Button */}
+          {/* Delete Section */}
+          <Card className="border-destructive/20">
+            <CardHeader>
+              <CardTitle className="text-destructive">Delete Person</CardTitle>
+              <CardDescription>
+                Permanently remove this person from the system
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="deleteReason">Reason for Deletion *</Label>
+                  <Input
+                    id="deleteReason"
+                    value={deleteReason}
+                    onChange={(e) => setDeleteReason(e.target.value)}
+                    placeholder="Enter reason for deletion"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {deleting ? 'Deleting...' : 'Delete Person'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
           <div className="flex gap-4 justify-end">
             <Button type="button" variant="outline" onClick={() => navigate('/admin/person')}>
               Cancel
-            </Button>
-            <Button type="submit" className="bg-primary hover:bg-primary/90">
-              <Save className="mr-2 h-4 w-4" />
-              Save Person
             </Button>
           </div>
         </div>

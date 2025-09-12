@@ -26,8 +26,9 @@ import DetailedPersonForm from "./pages/DetailedPersonForm";
 import ManageRelationshipType from "./pages/ManageRelationshipType";
 import ManageEncounters from "./pages/ManageEncounters";
 import CreateEncounter from "./pages/CreateEncounter";
-
-
+import PatientUpdate from "./pages/PatientUpdate";
+import UpdatePerson from "./pages/UpdatePerson";
+import AbhaWrapper from "./pages/AbhaWrapper";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -108,6 +109,21 @@ const App = () => (
               </MainLayout>
             </ProtectedRoute>
           } />
+          <Route path="/patient/edit/:patientId" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <PatientUpdate />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/abha" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <AbhaWrapper />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+
           <Route path="/admin" element={
             <ProtectedRoute>
               <MainLayout>
@@ -143,10 +159,10 @@ const App = () => (
               </MainLayout>
             </ProtectedRoute>
           } />
-          <Route path="/admin/edit-person/:uuid" element={
+          <Route path="/admin/update-person/:uuid" element={
             <ProtectedRoute>
               <MainLayout>
-              <DetailedPersonForm />
+              <UpdatePerson />
               </MainLayout>
             </ProtectedRoute>
           } />
