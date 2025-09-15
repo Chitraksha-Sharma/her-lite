@@ -78,20 +78,22 @@ export default function ManageEncounters() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-wrap items-center justify-between gap-4">
-        <CardTitle>Manage Encounters</CardTitle>
-        <Button onClick={() => navigate('/admin/create-encounter')}>
-          Add Encounter
-        </Button>
+      <CardHeader className="flex flex-wrap justify-between gap-4">
+        <CardTitle>Encounter</CardTitle>
+        <div>
+          <Button className='items-start' onClick={() => navigate('/admin/create-encounter')}>
+            Add Encounter
+          </Button>
+        </div>
       </CardHeader>
 
       <CardContent className="space-y-6">
         {/* Find Encounters */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Find Encounters</h3>
-          <div className="flex flex-wrap gap-4 items-end">
-            <div className="flex-1 min-w-64">
-              <Label htmlFor="search">Encounter ID, Patient ID, or Name</Label>
+        <div className="rounded-md bg-gray-100 border-gray-100 p-4">
+          <p className="text-lg font-semibold bg-primary text-primary-foreground mb-4">Find Encounters</p>
+          <div className="flex flex-wrap gap-4 items-end mb-3">
+            <div className="flex items-center gap-2 min-w-[280px]">
+              <Label htmlFor="search" className="whitespace-nowrap">Encounter ID, Patient ID, or Name</Label>
               <Input
                 id="search"
                 placeholder="Enter ID or name"
@@ -108,56 +110,46 @@ export default function ManageEncounters() {
               <Label htmlFor="includeDeleted">Include Deleted</Label>
             </div>
           </div>
-        </div>
 
-        {/* Encounters List */}
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Patient</TableHead>
-                <TableHead>Encounter Type</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredEncounters.length > 0 ? (
-                filteredEncounters.map((e) => (
-                  <TableRow
-                    key={e.uuid}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => navigate(`/admin/edit-encounter/${e.uuid}`)}
-                  >
-                    <TableCell className="font-medium">{e.patient.display}</TableCell>
-                    <TableCell>{e.encounterType.display}</TableCell>
-                    <TableCell>{e.location.display}</TableCell>
-                    <TableCell>
-                      {new Date(e.encounterDatetime).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={`text-xs px-2 py-1 rounded ${
-                          e.voided
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-green-100 text-green-800'
-                        }`}
-                      >
-                        {e.voided ? 'Deleted' : 'Active'}
-                      </span>
-                    </TableCell>
+          {/* Encounters List */}
+          {filteredEncounters.length > 0 && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Patient Name</TableHead>
+                    <TableHead>Encounter Type</TableHead>
+                    <TableHead>Form</TableHead>
+                    <TableHead>Provider</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Encounter Date</TableHead>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-6 text-gray-500">
-                    No encounters found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredEncounters.map((e) => (
+                    <TableRow
+                      key={e.uuid}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => navigate(`/admin/edit-encounter/${e.uuid}`)}
+                    >
+                      <TableCell className="font-medium">{e.patient.display}</TableCell>
+                      <TableCell>{e.encounterType.display}</TableCell>
+                      <TableCell>{e.form?.display || "-"}</TableCell>
+                      <TableCell>{e.provider?.display || "-"}</TableCell>
+                      <TableCell>{e.location.display}</TableCell>
+                      <TableCell>
+                        {new Date(e.encounterDatetime).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+          )}
+          {/* No data message */}
+          {filteredEncounters.length === 0 && (
+            <div>
+              No encounters found.
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

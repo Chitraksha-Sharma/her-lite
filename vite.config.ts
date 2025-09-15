@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
       // Proxy all requests starting with /openmrs to your OpenMRS server
       '/curiomed': {
         // '/openmrs': {
-        // target: 'http://192.168.1.210:8051',
+        // target: 'http://192.168.1.6:8000',
         target: 'http://regaldev-server.ddns.net:8051',
         changeOrigin: true,
         secure: false,

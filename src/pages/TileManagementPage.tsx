@@ -43,7 +43,10 @@ import ManageRelationshipType from './ManageRelationshipType';
 import ManagePersonAttributeType from './ManagePersonAttributeType';
 import { title } from 'process';
 import ManageProviders from './ManageProvider';
+import ManageProviderAttributeTypes from './ManageProviderAttributeTypes';
 import ManageEncounters from './ManageEncounters';
+import ManageEncounterTypes from './ManageEncounterTypes';
+import ManageEncounterRoles from './ManageEncounterRoles';
 
 // Define the structure for subtile data
 interface SubTileData {
@@ -145,7 +148,6 @@ const tileConfigs: Record<string, TileConfig> = {
         icon: CircleEllipsis,
         component: AutoGenerationConfiguration,
       },
-      // Add more subtiles as needed
     ],
   },
   person: {
@@ -219,6 +221,13 @@ const tileConfigs: Record<string, TileConfig> = {
         icon: UserCheck,
         component: ManageProviders,
       },
+      {
+        id: 'manage-provider-attributes',
+        title: 'Manage Provider Attributes Types',
+        description: 'provider attribute type management',
+        icon: UserCheck,
+        component: ManageProviderAttributeTypes,
+      },
     ]
   },
   encounters: {
@@ -233,6 +242,20 @@ const tileConfigs: Record<string, TileConfig> = {
         description: 'Encounter management',
         icon: UserCheck,
         component: ManageEncounters,
+      },
+      {
+        id: 'manage-encounters-types',
+        title: 'Manage Encounter Types',
+        description: 'Encounter type management',
+        icon: UserCheck,
+        component: ManageEncounterTypes,
+      },
+      {
+        id: 'manage-encounters-roles',
+        title: 'Manage Encounter Roles',
+        description: 'Encounter role management',
+        icon: UserCheck,
+        component: ManageEncounterRoles,
       },
     ]
   }
