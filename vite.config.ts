@@ -1,44 +1,44 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8090,
-    proxy: {
-      // Proxy all requests starting with /openmrs to your OpenMRS server
-      '/curiomed': {
-        // '/openmrs': {
-        // target: 'http://192.168.1.8:8000',
-        target: 'http://regaldev-server.ddns.net:8051',
-        changeOrigin: true,
-        secure: false,
-        // Optional: Add logging to debug proxy requests
-        configure: (proxy, options) => {
-          proxy.on('error', (err, req, res) => {
-            console.log('proxy error', err);
-          });
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            console.log('Sending Request to the Target:', req.method, req.url);
-          });
-          proxy.on('proxyRes', (proxyRes, req, res) => {
-            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
-          });
+export default defineConfig(({ mode }) => {
+  // Load environment variables based on the current mode (development/production)
+  const env = loadEnv(mode, process.cwd(), '');
+
+  return {
+    server: {
+      host: "::",
+      port: Number(env.VITE_DEV_PORT) || 3000,
+      proxy: {
+        // Use environment variable for API proxy
+        [env.VITE_API_URL]: {
+          target: env.VITE_API_TARGET,
+          changeOrigin: true,
+          secure: false,
+          configure: (proxy, options) => {
+            proxy.on('error', (err, req, res) => {
+              console.log('Proxy error:', err);
+            });
+            proxy.on('proxyReq', (proxyReq, req, res) => {
+              console.log('Sending request to target:', req.method, req.url);
+            });
+            proxy.on('proxyRes', (proxyRes, req, res) => {
+              console.log('Received response from target:', proxyRes.statusCode, req.url);
+            });
+          },
         },
-      }
-    }
-  },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+      },
     },
-  },
-}));
+    plugins: [
+      react(),
+      mode === 'development' && componentTagger(),
+    ].filter(Boolean),
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+    },
+  };
+});
