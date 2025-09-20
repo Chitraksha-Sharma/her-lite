@@ -9,6 +9,9 @@ import { Save, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createPerson } from '@/api/person'; // Import the createPerson function
+import { addPersonAttribute } from '@/api/PersonAttribute';
+import { getAllAttributeTypes } from '@/api/personAttributeType';
+
 
 export default function DetailedPersonForm() {
   const { uuid } = useParams<{ uuid: string }>();
@@ -42,6 +45,49 @@ export default function DetailedPersonForm() {
     deathDateEstimated: false,
     causeOfDeath: '',
   });
+
+  // --- inside DetailedPersonForm component ---
+
+   const [attributeTypeOptions, setAttributeTypeOptions] = useState<{ uuid: string; label: string }[]>([]);
+  const [attributes, setAttributes] = useState<{ attributeType: string; value: string }[]>([]);
+
+  // Fetch attribute types on mount
+  useEffect(() => {
+    async function loadAttributeTypes() {
+      const types = await getAllAttributeTypes();
+      const mapped = types.map((t) => ({
+        uuid: t.uuid,
+        label: t.name || t.display || "Unnamed",  // <-- safer mapping
+      }));
+      setAttributeTypeOptions(mapped);
+
+      // initialize first attribute if available
+      if (mapped.length > 0) {
+        setAttributes([{ attributeType: mapped[0].uuid, value: "" }]);
+      }
+    }
+
+    loadAttributeTypes();
+
+    if (!uuid) {
+      setLoading(false);
+    }
+  }, [uuid]);
+
+  // Handle Attribute Changes
+  const updateAttribute = (index: number, field: string, value: any) => {
+    const newAttributes = [...attributes];
+    (newAttributes[index] as any)[field] = value;
+    setAttributes(newAttributes);
+  };
+
+  const addAttribute = () => {
+    setAttributes([
+      ...attributes,
+      { attributeType: attributeTypeOptions[0].uuid, value: "" },
+    ]);
+  };
+
 
   // Load person if editing (removed API calls)
   useEffect(() => {
@@ -96,63 +142,76 @@ export default function DetailedPersonForm() {
     setPerson((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Validate & Save using only createPerson API
- const handleSave = async (e: React.FormEvent) => {
+
+const handleSave = async (e: React.FormEvent) => {
   e.preventDefault();
 
   const validName = names.some((n) => n.givenName.trim());
   if (!validName) {
-    toast.error('At least one name must have a Given Name');
+    toast.error("At least one name must have a Given Name");
     return;
   }
 
   if (!person.birthdate) {
-    toast.error('Birthdate is required');
+    toast.error("Birthdate is required");
     return;
   }
 
   try {
     // Prepare person data for createPerson API
     const personData = {
-      firstName: names.find(n => n.givenName.trim())?.givenName || names[0].givenName || '',
-      lastName: names.find(n => n.familyName?.trim())?.familyName || names[0].familyName || '',
+      firstName:
+        names.find((n) => n.givenName.trim())?.givenName ||
+        names[0].givenName ||
+        "",
+      lastName:
+        names.find((n) => n.familyName?.trim())?.familyName ||
+        names[0].familyName ||
+        "",
       gender: person.gender,
       birthdate: person.birthdate || null,
-      address: addresses[0] && (addresses[0].address1 || addresses[0].cityVillage) ? {
-        address1: addresses[0].address1 || undefined,
-        cityVillage: addresses[0].cityVillage || undefined,
-        country: addresses[0].country || undefined,
-        postalCode: addresses[0].postalCode || undefined,
-      } : null,
+      address:
+        addresses[0] && (addresses[0].address1 || addresses[0].cityVillage)
+          ? {
+              address1: addresses[0].address1 || undefined,
+              cityVillage: addresses[0].cityVillage || undefined,
+              country: addresses[0].country || undefined,
+              postalCode: addresses[0].postalCode || undefined,
+            }
+          : null,
     };
 
-    // Call createPerson from Person.ts - now with consistent API pattern!
+    // Step 1: Create Person
     const result = await createPerson(personData);
 
-    if (result.success) {
-      toast.success('Person created successfully!');
-      navigate('/admin/manage-person');
-    } else {
+    if (!result.success) {
       throw new Error(result.error);
     }
-  } catch (error: any) {
-    toast.error('Save failed: ' + (error.message || 'Server error'));
-  }
-};
 
-  // Handle Delete (removed API call)
-  const handleDelete = async () => {
-    if (!uuid) return;
-    if (!deleteReason.trim()) {
-      toast.error('Reason is required to delete');
-      return;
+    const createdPerson = result.data; // assume API returns person with uuid
+    const personUuid = createdPerson?.uuid;
+
+     // Step 2: save attributes
+      if (personUuid && attributes.length > 0) {
+        for (const attr of attributes) {
+          if (!attr.value.trim()) continue;
+
+          const attrRes = await addPersonAttribute(personUuid, {
+            uuid: attr.attributeType, // ✅ UUID
+            value: attr.value,
+          });
+
+          if (!attrRes.success) {
+            toast.error(`Failed to save attribute: ${attrRes.error}`);
+          }
+        }
+      }
+
+      toast.success("Person created successfully with attributes!");
+      navigate("/admin/manage-person");
+    } catch (error: any) {
+      toast.error("Save failed: " + (error.message || "Server error"));
     }
-
-    if (!confirm('Delete this person forever? This cannot be undone.')) return;
-
-    // Since we removed delete API, just show a message
-    toast.success('Delete functionality removed for demo');
-    navigate('/admin/manage-person');
   };
 
   if (loading) return <p className="p-4">Loading...</p>;
@@ -230,7 +289,7 @@ export default function DetailedPersonForm() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor={`familyName-${index}`}>Family Name *</Label>
+                          <Label htmlFor={`familyName-${index}`}>Last Name</Label>
                           <Input
                             id={`familyName-${index}`}
                             value={name.familyName}
@@ -238,7 +297,6 @@ export default function DetailedPersonForm() {
                               updateName(index, 'familyName', e.target.value)
                             }
                             placeholder="Optional"
-                            required
                           />
                         </div>
                       </div>
@@ -266,6 +324,7 @@ export default function DetailedPersonForm() {
                         <SelectContent>
                           <SelectItem value="M">Male</SelectItem>
                           <SelectItem value="F">Female</SelectItem>
+                          <SelectItem value="O">Other</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -370,7 +429,7 @@ export default function DetailedPersonForm() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={`address1-${index}`}>Address *</Label>
+                    <Label htmlFor={`address1-${index}`}>Address 1*</Label>
                     <Input
                       id={`address1-${index}`}
                       value={addr.address1}
@@ -378,7 +437,7 @@ export default function DetailedPersonForm() {
                         updateAddress(index, 'address1', e.target.value)
                       }
                       placeholder="Street, Building, etc."
-                      required
+                      // required
                     />
                   </div>
 
@@ -396,14 +455,14 @@ export default function DetailedPersonForm() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor={`city-${index}`}>City/Village *</Label>
+                      <Label htmlFor={`city-${index}`}>City/Village*</Label>
                       <Input
                         id={`city-${index}`}
                         value={addr.cityVillage}
                         onChange={(e) =>
                           updateAddress(index, 'cityVillage', e.target.value)
                         }
-                        required
+                        // required
                       />
                     </div>
                     <div className="space-y-2">
@@ -444,6 +503,66 @@ export default function DetailedPersonForm() {
               </Button>
             </CardContent>
           </Card>
+
+              {/* Attributes Section */}
+          <Card className="border-primary/20">
+            <CardHeader>
+              <CardTitle className="text-primary">Attributes</CardTitle>
+              <CardDescription>Additional person attributes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {attributes.map((attr, index) => (
+                <div
+                  key={index}
+                  className="space-y-3 p-4 border rounded-md mb-4 bg-gray-50"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Dropdown for Attribute Type */}
+                    <div className="space-y-2">
+                      <Label htmlFor={`attrType-${index}`}>Attribute Type</Label>
+                      <Select
+                        value={attr.attributeType}
+                        onValueChange={(value) =>
+                          updateAttribute(index, "attributeType", value)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select attribute type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {attributeTypeOptions.map((opt) => (
+                            <SelectItem key={opt.uuid} value={opt.uuid}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Input for Attribute Value */}
+                    <div className="space-y-2">
+                      <Label htmlFor={`attrValue-${index}`}>Value</Label>
+                      <Input
+                        id={`attrValue-${index}`}
+                        value={attr.value}
+                        onChange={(e) =>
+                          updateAttribute(index, "value", e.target.value)
+                        }
+                        placeholder="Enter value"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <Button type="button" variant="outline" onClick={addAttribute}>
+                + Add New Attribute
+              </Button>
+            </CardContent>
+          </Card>
+
+          
+
 
           {/* Save Button */}
           <div className="flex gap-4 justify-end">

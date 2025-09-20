@@ -224,7 +224,7 @@ export const fetchPatients = async (): Promise<Patient[]> => {
   };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const url = `${BASE_URL}/v1/fhir/Patient?_count=50`;
+  const url = `${BASE_URL}/v1/fhir/Patient?name=doe`;
 
   try {
     const res = await fetch(url, { headers });

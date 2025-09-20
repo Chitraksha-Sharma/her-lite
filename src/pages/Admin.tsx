@@ -52,10 +52,10 @@ const AdminTile: React.FC<AdminTileProps> = ({ data, onClick }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className={`p-2 rounded-lg ${data.color || 'bg-primary/10'}`}>
-              <data.icon className={`h-6 w-6 ${data.color ? 'text-white' : 'text-primary'}`} />
+              <data.icon className={`h-6 w-6 ${data.color ? 'text-white' : 'text-black'}`} />
             </div>
             <div>
-              <CardTitle className="text-lg font-semibold text-primary group-hover:text-primary/80">
+              <CardTitle className="text-lg font-semibold">
                 {data.title}
               </CardTitle>
               <CardDescription className="text-sm">
@@ -184,13 +184,13 @@ const Admin: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Administration</h1>
+          <h1 className="text-3xl font-bold text-black">Administration</h1>
           <p className="text-muted-foreground">
             Manage system settings, users, and healthcare data
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="text-sm">
+          <Badge variant="outline" className="text-sm border-primary">
             {session?.user?.display || 'Admin User'}
           </Badge>
           {/* {userRoles.map((role, index) => (
@@ -203,7 +203,7 @@ const Admin: React.FC = () => {
 
       {/* Admin Tiles Grid */}
       <div>
-        <h2 className="text-xl font-semibold text-primary mb-4">System Management</h2>
+        <h2 className="text-xl font-semibold text-black mb-4">System Management</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {adminTiles.map((tile) => (
             <AdminTile

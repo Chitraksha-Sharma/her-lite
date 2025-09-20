@@ -12,6 +12,8 @@ import {
   Activity
 } from "lucide-react";
 import ScheduleAppointmentModal from "@/components/ScheduleAppointmentModal";
+import { cn } from "@/lib/utils";
+
 
 const Dashboard = () => {
   const stats = [
@@ -42,6 +44,14 @@ const Dashboard = () => {
     { action: "Medical record updated", patient: "Emma Davis", time: "2 hours ago", type: "secondary", variant: "secondary" },
   ];
 
+  const badgeStyles: Record<string, string> = {
+    success: "bg-green-100 text-green-700 border-green-700 hover:bg-green-200",
+    info: "bg-blue-100 text-blue-700 border-blue-700 hover:bg-blue-200",
+    secondary: "bg-purple-100 text-purple-700 border-purple-700 hover:bg-purple-200",
+    default: "bg-gray-20 text-primary border-primary hover:bg-black/4",
+  };
+  
+
   const urgentAlerts = [
     { message: "Critical lab result for Patient ID: 1023", severity: "high" },
     { message: "Medication allergy alert for Sarah Wilson", severity: "medium" },
@@ -52,8 +62,8 @@ const Dashboard = () => {
     <div className="p-6 space-y-6 bg-background min-h-screen">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back! Here's your medical center overview.</p>
+          <h1 className="text-3xl font-bold text-black">Dashboard</h1>
+          <p className="text-muted-primary">Welcome back! Here's your medical center overview.</p>
         </div>
         <ScheduleAppointmentModal>
           <Button variant="animated" className="bg-primary hover:bg-primary/90">
@@ -71,13 +81,13 @@ const Dashboard = () => {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.title}
               </CardTitle>
-              <stat.icon className="h-4 w-4 text-primary" />
+              <stat.icon className="h-4 w-4 text-black" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{stat.value}</div>
+              <div className="text-2xl font-bold text-black">{stat.value}</div>
               <div className="flex items-center text-xs text-muted-foreground">
                 <TrendingUp className="mr-1 h-3 w-3" />
-                <span className="text-green-600">{stat.trend}</span> from last month
+                <span className="text-black-600">{stat.trend}</span> from last month
               </div>
             </CardContent>
           </Card>
@@ -87,26 +97,26 @@ const Dashboard = () => {
       {/* Quick Actions */}
       <Card className="border-primary/20">
         <CardHeader>
-          <CardTitle className="text-primary">Quick Actions</CardTitle>
+          <CardTitle className="text-black">Quick Actions</CardTitle>
           <CardDescription>Frequently used functions</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="text-primary hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5">
+            <Button variant="outline" className="text-black hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5">
               <Users className="h-6 w-6" />
               Register Patient
             </Button>
             <ScheduleAppointmentModal>
-              <Button variant="outline" className="text-primary hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5 w-full">
+              <Button variant="outline" className="text-black hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5 w-full">
                 <Calendar className="h-6 w-6" />
                 Schedule Visit
               </Button>
             </ScheduleAppointmentModal>
-            <Button variant="outline" className="text-primary hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5">
+            <Button variant="outline" className="text-black hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5">
               <TestTube className="h-6 w-6" />
               Lab Orders
             </Button>
-            <Button variant="outline" className="text-primary hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5">
+            <Button variant="outline" className="text-black hover:text-secondary h-20 flex-col gap-2 border-primary/20 hover:bg-primary/5">
               <FileText className="h-6 w-6" />
               Medical Records
             </Button>
@@ -118,7 +128,7 @@ const Dashboard = () => {
         {/* Recent Activities */}
         <Card className="lg:col-span-2 border-primary/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-primary">
+            <CardTitle className="flex items-center gap-2 text-black">
               <Activity className="h-5 w-5" />
               Recent Activities
             </CardTitle>
@@ -138,7 +148,16 @@ const Dashboard = () => {
                       <p className="text-sm text-muted-foreground">Patient: {activity.patient}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant={variant}>{activity.type}</Badge>
+                      {/* <Badge variant={variant}>{activity.type}</Badge> */}
+                      <Badge
+                        className={cn(
+                          "border px-2 py-1 rounded-md text-xs font-medium transition-colors",
+                          badgeStyles[activity.variant] || badgeStyles.default
+                        )}
+                      >
+                        {activity.type}
+                      </Badge>
+
                       <div className="flex items-center text-xs text-muted-foreground">
                         <Clock className="mr-1 h-3 w-3" />
                         {activity.time}

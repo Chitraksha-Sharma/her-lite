@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,9 +11,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { createAttributeType, getAllAttributeTypes, deleteAttributeType } from '@/api/personAttributeType';
+import { getPrivileges } from '@/api/privilege';
+import { deletePrivilege } from '@/api/privilege';
 
 interface PersonAttributeType {
-  id: string;
+  uuid?: string;
   name: string;
   format: string;
   searchable: boolean;
@@ -23,6 +27,7 @@ interface PersonAttributeType {
 interface AddAttributeForm {
   name: string;
   format: string;
+  // keep as string for input binding to avoid NaN warnings
   foreignKey: string;
   searchable: boolean;
   description: string;
@@ -31,95 +36,168 @@ interface AddAttributeForm {
 
 const ManagePersonAttributeType: React.FC = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [addForm, setAddForm] = useState<AddAttributeForm>({
-    name: '',
-    format: '',
-    foreignKey: '',
-    searchable: false,
-    description: '',
-    editPrivilege: ''
-  });
-
-  // Mock data - replace with actual API calls
-  const [attributeTypes] = useState<PersonAttributeType[]>([
-    {
-      id: '1',
-      name: 'Phone Number',
-      format: 'Text',
-      searchable: true,
-      description: 'Primary phone number',
-      editPrivilege: 'Admin'
-    },
-    {
-      id: '2',
-      name: 'Email Address',
-      format: 'Email',
-      searchable: true,
-      description: 'Primary email address',
-      editPrivilege: 'User'
-    },
-    {
-      id: '3',
-      name: 'Date of Birth',
-      format: 'Date',
-      searchable: false,
-      description: 'Patient date of birth',
-      editPrivilege: 'Admin'
-    }
-  ]);
-
-  const [listingForm, setListingForm] = useState({
-    maxSearchResults: '',
-    searchDelayMs: '',
-    numResultsShown: '',
-    viewPrivilege: '',
-    editPrivilege: ''
-  });
+  const [attributeTypes, setAttributeTypes] = useState<PersonAttributeType[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const formatOptions = ['Text', 'Number', 'Date', 'Email', 'Phone', 'Boolean'];
-  const privilegeOptions = ['Admin', 'User', 'Doctor', 'Nurse', 'View Only'];
+ 
+    // ✅ privilege list from API
+  const [privilegeOptions, setPrivilegeOptions] = useState<string[]>([]);
 
-  const handleAddSubmit = (e: React.FormEvent) => {
+  const [addForm, setAddForm] = useState<AddAttributeForm>({
+    name: "",
+    format: "",
+    foreignKey: "",
+    searchable: false,
+    description: "",
+    editPrivilege: "",
+  });
+
+
+  // ✅ fetch privileges when dialog opens
+  useEffect(() => {
+    async function fetchPrivileges() {
+      if (isAddDialogOpen) {
+        try {
+          const response = await getPrivileges();
+          console.log("Privileges API Response:", response); // Debugging log
+
+          // Access the results array from the response
+          const options = response.results.map((p: any) => {
+            console.log("Mapping privilege:", p); // Log each privilege
+            return p.display || p.name || p.uuid;
+          });
+          console.log("Mapped privilege options:", options); // Log mapped options
+          setPrivilegeOptions(options);
+        } catch (err) {
+          console.error("Error fetching privileges:", err); // Debugging log
+          toast({
+            title: "Error",
+            description: "Failed to load privileges",
+            variant: "destructive",
+          });
+        }
+      }
+    }
+    fetchPrivileges();
+  }, [isAddDialogOpen, toast]);
+
+  // ✅ Fetch attribute types on mount
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const data = await getAllAttributeTypes();
+        const mapped: PersonAttributeType[] = data.map((attr: any) => ({
+          uuid: attr.uuid,
+          name: attr.display ?? attr.name,
+          format: attr.format ?? "",
+          searchable: attr.searchable ?? false,
+          description: attr.description ?? "",
+          editPrivilege: attr.editPrivilege ?? "",
+        }));
+        setAttributeTypes(mapped);
+      } catch (err) {
+        toast({
+          title: "Error",
+          description: "Failed to load person attribute types",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [toast]);
+
+  // ✅ Submit new attribute
+  const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!addForm.name || !addForm.format) {
+    try {
+      // Build payload converting foreignKey to number only if provided
+      const payload: any = {
+        name: addForm.name,
+        description: addForm.description || undefined,
+        format: addForm.format,
+        searchable: addForm.searchable,
+        retired: false,
+      };
+
+      if (addForm.foreignKey && addForm.foreignKey.trim() !== "") {
+        const fk = Number(addForm.foreignKey);
+        if (!Number.isNaN(fk)) payload.foreignKey = fk;
+      }
+
+      if (addForm.editPrivilege && addForm.editPrivilege.trim() !== "") {
+        payload.editPrivilege = addForm.editPrivilege;
+      }
+
+      const newAttr = await createAttributeType(payload);
+
+      const mapped: PersonAttributeType = {
+        uuid: newAttr.uuid ?? "",
+        name: newAttr.display ?? newAttr.name,
+        format: newAttr.format ?? "",
+        searchable: newAttr.searchable ?? false,
+        description: newAttr.description ?? "",
+        editPrivilege: newAttr.editPrivilege ?? "",
+      };
+
+      setAttributeTypes((prev) => [...prev, mapped]); // update UI immediately
+      toast({ title: "Success", description: "Attribute added successfully." });
+
+      // reset form + close dialog
+      setAddForm({
+        name: "",
+        format: "",
+        foreignKey: "",
+        searchable: false,
+        description: "",
+        editPrivilege: "",
+      });
+      setIsAddDialogOpen(false);
+
+      // navigate to the Person tile and select Manage Person Attribute Type
+      navigate('/admin');
+    } catch (err) {
+      console.error('Create attribute failed', err);
       toast({
-        title: "Validation Error",
-        description: "Name and Format are required fields.",
+        title: "Error",
+        description: "Failed to add attribute type",
         variant: "destructive",
       });
-      return;
     }
-
-    // Here you would typically make an API call to save the attribute type
-    console.log('Adding new person attribute type:', addForm);
-    
-    toast({
-      title: "Success",
-      description: "Person attribute type added successfully.",
-    });
-
-    // Reset form and close dialog
-    setAddForm({
-      name: '',
-      format: '',
-      foreignKey: '',
-      searchable: false,
-      description: '',
-      editPrivilege: ''
-    });
-    setIsAddDialogOpen(false);
   };
 
-  const handleListingSave = () => {
-    // Here you would typically make an API call to save the listing configuration
-    console.log('Saving listing configuration:', listingForm);
-    
-    toast({
-      title: "Success",
-      description: "Listing configuration saved successfully.",
-    });
+  // Delete attribute type
+  const handleDelete = async (uuid?: string, editPrivilege?: string) => {
+    if (!uuid) return;
+    const confirmDel = window.confirm('Are you sure you want to delete this attribute type? This cannot be undone.');
+    if (!confirmDel) return;
+    try {
+      await deleteAttributeType(uuid);
+      setAttributeTypes((prev) => prev.filter((a) => a.uuid !== uuid));
+      toast({ title: 'Deleted', description: 'Attribute type deleted successfully.' });
+
+      // If attribute had an editPrivilege that looks like a UUID, offer to delete that privilege too
+      const isUuid = (s: string | undefined) => !!s && /^[0-9a-fA-F-]{36,}$/.test(s);
+      if (editPrivilege && isUuid(editPrivilege)) {
+        const confirmPriv = window.confirm('This attribute references a privilege. Do you also want to delete the referenced privilege?');
+        if (confirmPriv) {
+          try {
+            await deletePrivilege(editPrivilege);
+            toast({ title: 'Privilege deleted', description: 'Associated privilege deleted.' });
+          } catch (err) {
+            console.error('Failed to delete privilege', err);
+            toast({ title: 'Error', description: 'Failed to delete associated privilege', variant: 'destructive' });
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Delete attribute failed', err);
+      toast({ title: 'Error', description: 'Failed to delete attribute type', variant: 'destructive' });
+    }
   };
 
   return (
@@ -176,7 +254,7 @@ const ManagePersonAttributeType: React.FC = () => {
                     <Input
                       id="foreignKey"
                       value={addForm.foreignKey}
-                      onChange={(e) => setAddForm(prev => ({ ...prev, foreignKey: e.target.value }))}
+                      onChange={(e) => setAddForm(prev => ({ ...prev,  foreignKey: e.target.value }))}
                     />
                   </div>
 
@@ -199,23 +277,29 @@ const ManagePersonAttributeType: React.FC = () => {
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="editPrivilege">Edit Privilege</Label>
-                    <Select value={addForm.editPrivilege} onValueChange={(value) => setAddForm(prev => ({ ...prev, editPrivilege: value }))}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select privilege" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {privilegeOptions.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {option}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                 <div>
+              <Label htmlFor="editPrivilege">Edit Privilege</Label>
+              <Select
+                value={addForm.editPrivilege}
+                onValueChange={(value) =>
+                  setAddForm((prev) => ({ ...prev, editPrivilege: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select privilege" />
+                </SelectTrigger>
+                <SelectContent>
+                  {privilegeOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-                  <Button type="submit" className="w-full">
+
+                  <Button type="submit" className="w-full" >
                     Save Attribute Type
                   </Button>
                 </form>
@@ -231,107 +315,50 @@ const ManagePersonAttributeType: React.FC = () => {
           <CardTitle>Attribute Types</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Format</TableHead>
-                <TableHead>Searchable</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Edit Privilege</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {attributeTypes.map((attr) => (
-                <TableRow key={attr.id}>
-                  <TableCell className="font-medium">{attr.name}</TableCell>
-                  <TableCell>{attr.format}</TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      attr.searchable 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {attr.searchable ? 'Yes' : 'No'}
-                    </span>
-                  </TableCell>
-                  <TableCell>{attr.description}</TableCell>
-                  <TableCell>{attr.editPrivilege}</TableCell>
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Format</TableHead>
+                  <TableHead>Searchable</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Edit Privilege</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {/* Section 3: Listing and Viewing Configuration */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Listing and Viewing of Person Attribute Types</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-4">
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground min-w-[200px]">Maximum search results:</span>
-              <Input
-                className="w-32"
-                value={listingForm.maxSearchResults}
-                onChange={(e) => setListingForm(prev => ({ ...prev, maxSearchResults: e.target.value }))}
-                placeholder="100"
-              />
-              <span className="text-sm text-muted-foreground">results per page</span>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground min-w-[200px]">Search delay:</span>
-              <Input
-                className="w-32"
-                value={listingForm.searchDelayMs}
-                onChange={(e) => setListingForm(prev => ({ ...prev, searchDelayMs: e.target.value }))}
-                placeholder="300"
-              />
-              <span className="text-sm text-muted-foreground">milliseconds before search</span>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground min-w-[200px]">Number of results shown:</span>
-              <Input
-                className="w-32"
-                value={listingForm.numResultsShown}
-                onChange={(e) => setListingForm(prev => ({ ...prev, numResultsShown: e.target.value }))}
-                placeholder="25"
-              />
-              <span className="text-sm text-muted-foreground">items in dropdown</span>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground min-w-[200px]">View privilege required:</span>
-              <Input
-                className="w-48"
-                value={listingForm.viewPrivilege}
-                onChange={(e) => setListingForm(prev => ({ ...prev, viewPrivilege: e.target.value }))}
-                placeholder="View Person Attributes"
-              />
-              <span className="text-sm text-muted-foreground">to view attributes</span>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground min-w-[200px]">Edit privilege required:</span>
-              <Input
-                className="w-48"
-                value={listingForm.editPrivilege}
-                onChange={(e) => setListingForm(prev => ({ ...prev, editPrivilege: e.target.value }))}
-                placeholder="Edit Person Attributes"
-              />
-              <span className="text-sm text-muted-foreground">to edit attributes</span>
-            </div>
-          </div>
-
-          <div className="pt-4">
-            <Button onClick={handleListingSave}>
-              Save Configuration
-            </Button>
-          </div>
+              </TableHeader>
+              <TableBody>
+                {attributeTypes.map((attr) => (
+                  <TableRow key={attr.uuid}>
+                    <TableCell className="font-medium">{attr.name}</TableCell>
+                    <TableCell>{attr.format}</TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        attr.searchable 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {attr.searchable ? 'Yes' : 'No'}
+                      </span>
+                    </TableCell>
+                    <TableCell>{attr.description}</TableCell>
+                    <TableCell>{attr.editPrivilege}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(attr.uuid, attr.editPrivilege)}
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

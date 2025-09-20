@@ -65,11 +65,11 @@ const Laboratory = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge variant="default" className="bg-emerald-100 text-emerald-800"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>;
+        return <Badge variant="default" className="bg-gray-20 text-emerald-800 border-emerald-200 hover:bg-black/4"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>;
       case "pending":
-        return <Badge variant="secondary" className="bg-amber-100 text-amber-800"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
+        return <Badge variant="secondary" className="bg-gray-20 text-amber-800 border-amber-200 hover:bg-black/4"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
       case "in-progress":
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800"><Microscope className="w-3 h-3 mr-1" />In Progress</Badge>;
+        return <Badge variant="outline" className="bg-gray-20 text-blue-800 border-blue-300 "><Microscope className="w-3 h-3 mr-1" />In Progress</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -77,8 +77,8 @@ const Laboratory = () => {
 
   const getPriorityBadge = (priority: string) => {
     return priority === "urgent" ? 
-      <Badge variant="destructive" className="bg-red-100 text-red-800"><AlertCircle className="w-3 h-3 mr-1" />Urgent</Badge> : 
-      <Badge variant="outline" className="bg-gray-100 text-gray-800">Normal</Badge>;
+      <Badge variant="destructive" className="bg-red-20 text-red-800 border-red-200 hover:bg-black/4"><AlertCircle className="w-3 h-3 mr-1" />Urgent</Badge> : 
+      <Badge variant="outline" className="bg-gray-20 text-gray-800 border-gray-250">Normal</Badge>;
   };
 
   return (
@@ -89,7 +89,7 @@ const Laboratory = () => {
           <TestTube className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-primary">Laboratory</h1>
+          <h1 className="text-3xl font-bold text-black">Laboratory</h1>
           <p className="text-muted-foreground">Manage lab tests and view results</p>
         </div>
       </div>
@@ -102,7 +102,7 @@ const Laboratory = () => {
               <TestTube className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-muted-foreground">Total Tests</span>
             </div>
-            <div className="text-2xl font-bold text-primary">156</div>
+            <div className="text-2xl font-bold">156</div>
           </CardContent>
         </Card>
         <Card>
@@ -111,7 +111,7 @@ const Laboratory = () => {
               <Clock className="h-4 w-4 text-amber-600" />
               <span className="text-sm font-medium text-muted-foreground">Pending</span>
             </div>
-            <div className="text-2xl font-bold text-amber-600">23</div>
+            <div className="text-2xl font-bold">23</div>
           </CardContent>
         </Card>
         <Card>
@@ -120,7 +120,7 @@ const Laboratory = () => {
               <Microscope className="h-4 w-4 text-blue-600" />
               <span className="text-sm font-medium text-muted-foreground">In Progress</span>
             </div>
-            <div className="text-2xl font-bold text-blue-600">12</div>
+            <div className="text-2xl font-bold">12</div>
           </CardContent>
         </Card>
         <Card>
@@ -129,7 +129,7 @@ const Laboratory = () => {
               <CheckCircle className="h-4 w-4 text-emerald-600" />
               <span className="text-sm font-medium text-muted-foreground">Completed</span>
             </div>
-            <div className="text-2xl font-bold text-emerald-600">121</div>
+            <div className="text-2xl font-bold">121</div>
           </CardContent>
         </Card>
       </div>

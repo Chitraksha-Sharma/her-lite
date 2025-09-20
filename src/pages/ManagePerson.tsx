@@ -223,41 +223,42 @@ export default function ManagePerson() {
   // Render search view
   return (
     <Card>
-      <CardHeader className="flex flex-wrap items-center justify-between gap-4">
-        <CardTitle>Person</CardTitle>
-        <Button onClick={() => navigate('/admin/create-person')}>
-          Create
-        </Button>
-      </CardHeader>
-
       <CardContent className="space-y-8">
         {/* Find a Person */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Find a person</h3>
-          <div className="flex flex-wrap gap-4">
-            <div className="flex-1 min-w-64">
-              <Label htmlFor="search">Person Name</Label>
-              <Input
-                id="search"
-                placeholder="Enter name to search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="flex items-end">
-              <div className="flex items-center space-x-2">
-                <Checkbox
+
+          <div className="grid gap-4 md:grid-cols-2 md:items-end">
+            {/* Left side: Search + checkbox */}
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <Label className="shrink-0">Person Name:</Label>
+                <Input
+                  placeholder="Enter name to search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-1"
+               />
+              </div>
+             <div className="flex items-center space-x-2">
+               <Checkbox
                   id="includeDeleted"
                   checked={includeDeleted}
-                  onCheckedChange={(checked) =>
-                    setIncludeDeleted(!!checked)
-                  }
+                  onCheckedChange={(checked) => setIncludeDeleted(!!checked)}
                 />
                 <Label htmlFor="includeDeleted">Include Deleted</Label>
               </div>
             </div>
+
+            {/* Right side: Create button */}
+            <div className="flex justify-start md:justify-end">
+              <Button onClick={() => navigate('/admin/create-person')}>
+                Create New Person
+              </Button>
+            </div>
           </div>
         </div>
+
 
         {/* Debug info */}
         {loading && <p className="text-blue-600">Searching...</p>}
@@ -318,7 +319,7 @@ export default function ManagePerson() {
                           View
                         </Button>
                         <Button
-                          variant="outline"
+                          variant="outline" 
                           size="sm"
                           onClick={() => {
                             if (personId) {

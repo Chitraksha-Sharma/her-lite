@@ -101,11 +101,11 @@ const MedicalRecords = () => {
     switch (status) {
       case "completed":
       case "final":
-        return <Badge variant="default" className="bg-emerald-100 text-emerald-800">Final</Badge>;
+        return <Badge variant="default" className="bg-gray-20 text-emerald-900 hover:bg-black/4 border-emerald-200">Final</Badge>;
       case "reviewed":
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Reviewed</Badge>;
+        return <Badge variant="secondary" className="bg-gray-20 text-blue-800 hover:bg-black/4 border-blue-300">Reviewed</Badge>;
       case "pending":
-        return <Badge variant="outline" className="bg-amber-100 text-amber-800">Pending</Badge>;
+        return <Badge variant="outline" className="bg-gray-20 text-amber-800 hover:bg-black/4">Pending</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -132,7 +132,7 @@ const MedicalRecords = () => {
           <FileText className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-primary">Medical Records</h1>
+          <h1 className="text-3xl font-bold text-black">Medical Records</h1>
           <p className="text-muted-foreground">View and manage patient medical records</p>
         </div>
       </div>
@@ -145,7 +145,7 @@ const MedicalRecords = () => {
               <FileText className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-muted-foreground">Total Records</span>
             </div>
-            <div className="text-2xl font-bold text-primary">1,247</div>
+            <div className="text-2xl font-bold">1,247</div>
           </CardContent>
         </Card>
         <Card>
@@ -154,7 +154,7 @@ const MedicalRecords = () => {
               <Stethoscope className="h-4 w-4 text-blue-600" />
               <span className="text-sm font-medium text-muted-foreground">Consultations</span>
             </div>
-            <div className="text-2xl font-bold text-blue-600">856</div>
+            <div className="text-2xl font-bold">856</div>
           </CardContent>
         </Card>
         <Card>
@@ -163,7 +163,7 @@ const MedicalRecords = () => {
               <Activity className="h-4 w-4 text-emerald-600" />
               <span className="text-sm font-medium text-muted-foreground">Lab Reports</span>
             </div>
-            <div className="text-2xl font-bold text-emerald-600">234</div>
+            <div className="text-2xl font-bold">234</div>
           </CardContent>
         </Card>
         <Card>
@@ -172,7 +172,7 @@ const MedicalRecords = () => {
               <File className="h-4 w-4 text-amber-600" />
               <span className="text-sm font-medium text-muted-foreground">Imaging</span>
             </div>
-            <div className="text-2xl font-bold text-amber-600">157</div>
+            <div className="text-2xl font-bold">157</div>
           </CardContent>
         </Card>
       </div>

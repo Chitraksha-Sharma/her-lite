@@ -75,6 +75,26 @@ const PatientRegistration = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const relationshipTypes = [
+    "Father",
+    "Mother", 
+    "Spouse",
+    "Son",
+    "Daughter",
+    "Brother",
+    "Sister",
+    "Guardian",
+    "Other"
+  ];
+
+  const visitTypes = [
+    "OPD Visit",
+    "Emergency Visit", 
+    "Follow-up Visit",
+    "Consultation",
+    "Check-up"
+  ];
+
   // Format Aadhaar input: 1234-5678-9012
   const formatAadhaar = (value: string) => {
     const cleaned = value.replace(/\D/g, "").slice(0, 12);
@@ -160,6 +180,31 @@ const PatientRegistration = () => {
       console.log("Invalid email format");
     }
   };
+
+  //  // Relationship handlers
+  //  const addRelationship = () => {
+  //   setRelationships([...relationships, { type: "", nameOrId: "", tillDate: "" }]);
+  // };
+
+  // const removeRelationship = (index: number) => {
+  //   if (relationships.length > 1) {
+  //     setRelationships(relationships.filter((_, i) => i !== index));
+  //   }
+  // };
+
+  // const updateRelationship = (index: number, field: string, value: string) => {
+  //   const updated = relationships.map((rel, i) => 
+  //     i === index ? { ...rel, [field]: value } : rel
+  //   );
+  //   setRelationships(updated);
+  // };
+
+  // const saveRelationships = () => {
+  //   toast({
+  //     title: "Success",
+  //     description: "Relationships saved successfully!",
+  //   });
+  // };
 
 
 
@@ -337,7 +382,7 @@ const PatientRegistration = () => {
           <Save className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-primary">Patient Registration</h1>
+          <h1 className="text-3xl font-bold text-black">Patient Registration</h1>
           <p className="text-muted-foreground">Register a new patient in the system</p>
         </div>
       </div>
@@ -347,7 +392,7 @@ const PatientRegistration = () => {
           {/* Personal Information with Profile Image */}
           <Card className="border-primary/20">
             <CardHeader>
-              <CardTitle className="text-primary">Personal Information</CardTitle>
+              <CardTitle className="text-black">Personal Information</CardTitle>
               <CardDescription>Basic patient details and profile photo</CardDescription>
             </CardHeader>
             <CardContent>
@@ -600,7 +645,7 @@ const PatientRegistration = () => {
           {/* Contact Information */}
           <Card className="border-primary/20">
             <CardHeader>
-              <CardTitle className="text-primary">Contact Information</CardTitle>
+              <CardTitle className="text-black">Contact Information</CardTitle>
               <CardDescription>Phone, email, and address details</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
@@ -638,7 +683,7 @@ const PatientRegistration = () => {
 
           <Card className="border-primary/20">
             <CardHeader>
-              <CardTitle className="text-primary">Address</CardTitle>
+              <CardTitle className="text-black">Address</CardTitle>
               <CardDescription>Address details</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
@@ -735,7 +780,7 @@ const PatientRegistration = () => {
           {/* Emergency Contact */}
           <Card className="border-primary/20">
             <CardHeader>
-              <CardTitle className="text-primary">Emergency Contact</CardTitle>
+              <CardTitle className="text-black">Emergency Contact</CardTitle>
               <CardDescription>Emergency contact information</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
@@ -768,7 +813,7 @@ const PatientRegistration = () => {
           {/* Medical Information */}
           <Card className="border-primary/20">
             <CardHeader>
-              <CardTitle className="text-primary">Medical Information</CardTitle>
+              <CardTitle className="text-black">Medical Information</CardTitle>
               <CardDescription>Medical history and health details</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">

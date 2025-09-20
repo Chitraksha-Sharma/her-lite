@@ -98,7 +98,7 @@ const PatientList = () => {
             <Users className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-primary">
+            <h1 className="text-3xl font-bold text-black">
               Patient Management
             </h1>
             <p className="text-muted-foreground">
@@ -125,11 +125,11 @@ const PatientList = () => {
                 <p className="text-sm font-medium text-muted-foreground">
                   Total Patients
                 </p>
-                <p className="text-2xl font-bold text-primary">
+                <p className="text-2xl font-bold">
                   {patients.length}
                 </p>
               </div>
-              <Users className="h-8 w-8 text-primary" />
+              <Users className="h-8 w-8 " />
             </div>
           </CardContent>
         </Card>
@@ -140,7 +140,7 @@ const PatientList = () => {
                 <p className="text-sm font-medium text-muted-foreground">
                   Active Patients
                 </p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold">
                   {patients.filter((p) => p.status === "Active").length}
                 </p>
               </div>
@@ -157,7 +157,7 @@ const PatientList = () => {
                 <p className="text-sm font-medium text-muted-foreground">
                   Critical Cases
                 </p>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-2xl font-bold">
                   {patients.filter((p) => p.status === "Critical").length}
                 </p>
               </div>
@@ -172,7 +172,7 @@ const PatientList = () => {
       {/* Search & Filter */}
       <Card className="border-primary/20">
         <CardHeader>
-          <CardTitle className="text-primary">Search & Filter Patients</CardTitle>
+          <CardTitle className="text-black">Search & Filter Patients</CardTitle>
           <CardDescription>
             Find patients quickly using search and filters
           </CardDescription>
@@ -213,7 +213,7 @@ const PatientList = () => {
       {/* Patient List */}
       <Card className="border-primary/20">
         <CardHeader>
-          <CardTitle className="text-primary">
+          <CardTitle className="text-black">
             Patient List ({filteredPatients.length})
           </CardTitle>
           <CardDescription>

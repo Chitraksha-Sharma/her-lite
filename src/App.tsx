@@ -29,6 +29,7 @@ import CreateEncounter from "./pages/CreateEncounter";
 import PatientUpdate from "./pages/PatientUpdate";
 import UpdatePerson from "./pages/UpdatePerson";
 import AbhaWrapper from "./pages/AbhaWrapper";
+import ManagePersonAttributeType from "./pages/ManagePersonAttributeType";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -170,6 +171,13 @@ const App = () => (
             <ProtectedRoute>
               <MainLayout>
               <ManageRelationshipType />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/manage-person-attribute-type" element={
+            <ProtectedRoute>
+              <MainLayout>
+              <ManagePersonAttributeType />
               </MainLayout>
             </ProtectedRoute>
           } />

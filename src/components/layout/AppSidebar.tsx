@@ -58,7 +58,7 @@ export function AppSidebar() {
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-primary/10 text-primary font-medium " : "hover:bg-muted/50";
+    isActive ? "bg-primary/10 text-black font-medium " : "hover:bg-muted/50";
 
   const handleLogout = async () => {
     try {
@@ -82,7 +82,7 @@ export function AppSidebar() {
             </div>
             {!collapsed && (
               <div>
-                <h2 className="font-bold text-primary">HealthCare EHR</h2>
+                <h2 className="font-bold text-black">HealthCare EHR</h2>
                 <p className="text-xs text-muted-foreground">Medical System</p>
               </div>
             )}
@@ -91,7 +91,7 @@ export function AppSidebar() {
 
         {/* Navigation */}
         <SidebarGroup className="flex-1">
-          <SidebarGroupLabel className="text-primary font-medium">
+          <SidebarGroupLabel className="text-black font-medium">
             {!collapsed ? "Navigation" : ""}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -133,7 +133,7 @@ export function AppSidebar() {
 
         {/* Logout */}
         <div className="p-2 border-t-2 border-primary/10">
-          <SidebarMenuButton onClick={handleLogout} className="w-full font-semibold text-primary hover:bg-destructive/10 hover:text-destructive">
+          <SidebarMenuButton onClick={handleLogout} className="w-full font-semibold text-black hover:bg-destructive/10 hover:text-destructive">
             <LogOut className="h-4 w-4 shrink-0" />
             {!collapsed && <span className="ml-3">Logout</span>}
           </SidebarMenuButton>

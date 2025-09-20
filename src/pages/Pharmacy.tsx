@@ -86,11 +86,11 @@ const Pharmacy = () => {
   const getStockBadge = (status: string, stock: number) => {
     switch (status) {
       case "in-stock":
-        return <Badge variant="default" className="bg-emerald-100 text-emerald-800"><CheckCircle className="w-3 h-3 mr-1" />In Stock ({stock})</Badge>;
+        return <Badge variant="default" className="bg-gray-20 text-emerald-800 hover:bg-black/4 border-emerald-200"><CheckCircle className="w-3 h-3 mr-1" />In Stock ({stock})</Badge>;
       case "low-stock":
-        return <Badge variant="secondary" className="bg-amber-100 text-amber-800"><AlertTriangle className="w-3 h-3 mr-1" />Low Stock ({stock})</Badge>;
+        return <Badge variant="secondary" className="bg-gray-20 text-amber-800 hover:bg-black/4 border-amber-300"><AlertTriangle className="w-3 h-3 mr-1" />Low Stock ({stock})</Badge>;
       case "out-of-stock":
-        return <Badge variant="destructive" className="bg-red-100 text-red-800"><Package className="w-3 h-3 mr-1" />Out of Stock</Badge>;
+        return <Badge variant="destructive" className="bg-gray-20 text-red-800 hover:bg-black/4 border-red-300"><Package className="w-3 h-3 mr-1" />Out of Stock</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -99,9 +99,9 @@ const Pharmacy = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "dispensed":
-        return <Badge variant="default" className="bg-emerald-100 text-emerald-800"><CheckCircle className="w-3 h-3 mr-1" />Dispensed</Badge>;
+        return <Badge variant="default" className="bg-gray-20 text-emerald-800 hover:bg-black/4 border-emerald-200"><CheckCircle className="w-3 h-3 mr-1" />Dispensed</Badge>;
       case "pending":
-        return <Badge variant="secondary" className="bg-amber-100 text-amber-800"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
+        return <Badge variant="secondary" className="bg-gray-20 text-amber-800 hover:bg-black/4 border-amber-300"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -115,7 +115,7 @@ const Pharmacy = () => {
           <Pill className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-primary">Pharmacy</h1>
+          <h1 className="text-3xl font-bold text-black">Pharmacy</h1>
           <p className="text-muted-foreground">Manage medications and prescriptions</p>
         </div>
       </div>
@@ -128,7 +128,7 @@ const Pharmacy = () => {
               <Package className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-muted-foreground">Total Medications</span>
             </div>
-            <div className="text-2xl font-bold text-primary">425</div>
+            <div className="text-2xl font-bold">425</div>
           </CardContent>
         </Card>
         <Card>
@@ -137,7 +137,7 @@ const Pharmacy = () => {
               <AlertTriangle className="h-4 w-4 text-amber-600" />
               <span className="text-sm font-medium text-muted-foreground">Low Stock</span>
             </div>
-            <div className="text-2xl font-bold text-amber-600">12</div>
+            <div className="text-2xl font-bold">12</div>
           </CardContent>
         </Card>
         <Card>
@@ -146,7 +146,7 @@ const Pharmacy = () => {
               <FileText className="h-4 w-4 text-blue-600" />
               <span className="text-sm font-medium text-muted-foreground">Pending Prescriptions</span>
             </div>
-            <div className="text-2xl font-bold text-blue-600">8</div>
+            <div className="text-2xl font-bold">8</div>
           </CardContent>
         </Card>
         <Card>
@@ -155,7 +155,7 @@ const Pharmacy = () => {
               <ShoppingCart className="h-4 w-4 text-emerald-600" />
               <span className="text-sm font-medium text-muted-foreground">Today's Sales</span>
             </div>
-            <div className="text-2xl font-bold text-emerald-600">$1,245</div>
+            <div className="text-2xl font-bold">$1,245</div>
           </CardContent>
         </Card>
       </div>

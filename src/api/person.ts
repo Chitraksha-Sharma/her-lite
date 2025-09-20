@@ -10,12 +10,13 @@ export interface PersonResponse {
   data?: any;
   error?: string;
 }
-
+ 
 /**
  * Create a new person with the given details
  */
 export async function createPerson(personData: {
   firstName: string;
+  middleName?: string;
   lastName: string;
   gender: string;
   birthdate?: string | null;

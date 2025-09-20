@@ -80,13 +80,13 @@ const Appointments = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "scheduled":
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800"><Clock className="w-3 h-3 mr-1" />Scheduled</Badge>;
+        return <Badge variant="outline" className="bg-gray-20 text-blue-800 hover:bg-black/4 border-blue-300"><Clock className="w-3 h-3 mr-1" />Scheduled</Badge>;
       case "confirmed":
-        return <Badge variant="default" className="bg-emerald-100 text-emerald-800"><CheckCircle className="w-3 h-3 mr-1" />Confirmed</Badge>;
+        return <Badge variant="outline" className="bg-gray-20 text-emerald-800 hover:bg-black/4 border-emerald-300"><CheckCircle className="w-3 h-3 mr-1" />Confirmed</Badge>;
       case "completed":
-        return <Badge variant="outline" className="bg-gray-100 text-gray-800"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>;
+        return <Badge variant="outline" className="bg-gray-20 text-gray-800 hover:bg-black/4 border-gray-300"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>;
       case "cancelled":
-        return <Badge variant="destructive" className="bg-red-100 text-red-800"><XCircle className="w-3 h-3 mr-1" />Cancelled</Badge>;
+        return <Badge variant="destructive" className="bg-gray-20 text-red-800 hover:bg-black/4 border-red-300"><XCircle className="w-3 h-3 mr-1" />Cancelled</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -103,7 +103,7 @@ const Appointments = () => {
           <CalendarIcon className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-primary">Appointments</h1>
+          <h1 className="text-3xl font-bold text-black">Appointments</h1>
           <p className="text-muted-foreground">Manage patient appointments and scheduling</p>
         </div>
       </div>
@@ -116,7 +116,7 @@ const Appointments = () => {
               <CalendarDays className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-muted-foreground">Today's Appointments</span>
             </div>
-            <div className="text-2xl font-bold text-primary">{todaysAppointments.length}</div>
+            <div className="text-2xl font-bold text-black">{todaysAppointments.length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -125,7 +125,7 @@ const Appointments = () => {
               <Clock className="h-4 w-4 text-blue-600" />
               <span className="text-sm font-medium text-muted-foreground">Upcoming</span>
             </div>
-            <div className="text-2xl font-bold text-blue-600">{upcomingAppointments.length}</div>
+            <div className="text-2xl font-bold text-blue">{upcomingAppointments.length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -134,7 +134,7 @@ const Appointments = () => {
               <CheckCircle className="h-4 w-4 text-emerald-600" />
               <span className="text-sm font-medium text-muted-foreground">Completed</span>
             </div>
-            <div className="text-2xl font-bold text-emerald-600">1</div>
+            <div className="text-2xl font-bold text-emerald">1</div>
           </CardContent>
         </Card>
         <Card>
@@ -143,7 +143,7 @@ const Appointments = () => {
               <Users className="h-4 w-4 text-amber-600" />
               <span className="text-sm font-medium text-muted-foreground">Total Patients</span>
             </div>
-            <div className="text-2xl font-bold text-amber-600">4</div>
+            <div className="text-2xl font-bold text-amber">4</div>
           </CardContent>
         </Card>
       </div>
@@ -264,10 +264,10 @@ const Appointments = () => {
                         <Button size="sm" variant="outline">View</Button>
                         {appointment.status === "scheduled" && (
                           <>
-                            <Button size="sm" className="bg-primary hover:bg-primary/90">Confirm</Button>
-                            <Button size="sm" variant="destructive">Cancel</Button>
+                            <Button size="sm" className="bg-gray-20 text-primary border-primary hover:bg-black/4">Confirm</Button>
+                            <Button size="sm" className="bg-gray-20 text-red-600 border-red-600 hover:bg-black/4">Cancel</Button>
                           </>
-                        )}
+                        )} 
                       </div>
                     </TableCell>
                   </TableRow>
