@@ -1,18 +1,14 @@
 // src/api/auth.ts
-
-const BASE_URL = "/curiomed/v1";
+import { API_BASE } from "./apiBase";
 
 /**
  * Login with username/password.
- * Returns { success, token, user }
  */
 export async function loginApi(username: string, password: string) {
-  try{
-    const response = await fetch(`${BASE_URL}/auth/login`, {
+  try {
+    const response = await fetch(`${API_BASE}/v1/auth/login`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
 
@@ -25,33 +21,26 @@ export async function loginApi(username: string, password: string) {
 
     return {
       success: true,
-      token: data.accessToken, // ✅ save this!
+      token: data.accessToken,
       user: data.user,
     };
-  }catch (err) {
+  } catch (err) {
     console.error("Network/login error:", err);
     return { success: false, error: "Network error" };
   }
 }
 
 /**
- * Logout function.
- * If backend supports a logout endpoint, call it.
- * Otherwise, just remove token client-side.
+ * Logout function
  */
 export async function logoutApi(token: string) {
   try {
-    const response = await fetch(`${BASE_URL}/auth/logout`, {
-      method: "POST", // check your backend spec, could be POST or DELETE
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const response = await fetch(`${API_BASE}/v1/auth/logout`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (!response.ok) {
-      throw new Error("Logout failed");
-    }
-
+    if (!response.ok) throw new Error("Logout failed");
     return true;
   } catch (err) {
     console.warn("Logout failed on server, clearing token locally");
@@ -60,20 +49,14 @@ export async function logoutApi(token: string) {
 }
 
 /**
- * Get current user profile from token.
- * (If backend does not provide a `/me` or `/session`, you can decode JWT client-side instead.)
+ * Get current user profile
  */
 export async function getCurrentUser(token: string) {
-  const response = await fetch(`${BASE_URL}/auth/me`, {
+  const response = await fetch(`${API_BASE}/v1/auth/me`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch user profile");
-  }
-
+  if (!response.ok) throw new Error("Failed to fetch user profile");
   return await response.json();
-}
+};

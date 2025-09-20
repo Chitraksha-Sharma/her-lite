@@ -1,4 +1,5 @@
-const BASE_URL = "/curiomed/v1";
+// const BASE_URL = "/curiomed/v1";
+import { API_BASE } from "./apiBase";
 
 function getAuthHeaders() {
   const token = localStorage.getItem("authToken");
@@ -27,7 +28,7 @@ export async function addPersonAttribute(
       value: attributeData.value,
     };
 
-    const res = await fetch(`${BASE_URL}/person/${personUuid}/attribute`, {
+    const res = await fetch(`${API_BASE}/v1/person/${personUuid}/attribute`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -60,7 +61,7 @@ export async function getPersonAttributes(
   personUuid: string
 ): Promise<{ success: boolean; data?: PersonAttribute[]; error?: string }> {
   try {
-    const res = await fetch(`${BASE_URL}/person/${personUuid}/attribute`, {
+    const res = await fetch(`${API_BASE}/v1/person/${personUuid}/attribute`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -114,7 +115,7 @@ export async function updatePersonAttribute(
     const payload = { value: attributeData.value };
 
     const res = await fetch(
-      `${BASE_URL}/person/${personUuid}/attribute/${attributeUuid}`,
+      `${API_BASE}/v1/person/${personUuid}/attribute/${attributeUuid}`,
       {
         method: "POST", 
         headers: {
@@ -150,7 +151,7 @@ export async function deletePersonAttribute(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const res = await fetch(
-      `${BASE_URL}/person/${personUuid}/attribute/${attributeUuid}`,
+      `${API_BASE}/v1/person/${personUuid}/attribute/${attributeUuid}`,
       {
         method: "DELETE",
         headers: {

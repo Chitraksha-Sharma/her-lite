@@ -1,4 +1,5 @@
-const BASE_URL = '/curiomed/v1';
+// const BASE_URL = '/curiomed/v1';
+import { API_BASE } from "./apiBase";
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('authToken');
@@ -14,7 +15,7 @@ export interface privilege {
 }
 
 export const getPrivileges = async () => {
-    const res = await fetch(`${BASE_URL}/privilege`, {
+    const res = await fetch(`${API_BASE}/v1/privilege`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -29,7 +30,7 @@ export const getPrivileges = async () => {
 };
 
 export const getPrivilegeByUuid = async (uuid: string) => {
-    const res = await fetch(`${BASE_URL}/privilege/${uuid}`, {
+    const res = await fetch(`${API_BASE}/v1/privilege/${uuid}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -50,7 +51,7 @@ export const createPrivilege = async (privilegeData: {name: string, description:
         description: privilegeData.description, 
         retired: false,
     };
-    const res = await fetch(`${BASE_URL}/privilege`, {
+    const res = await fetch(`${API_BASE}/v1/privilege`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -70,7 +71,7 @@ export const updatePrivilege = async (uuid: string, privilegeData: {description?
     const payload = {
         description: privilegeData.description,
     };
-    const res = await fetch(`${BASE_URL}/privilege/${uuid}`, {  
+    const res = await fetch(`${API_BASE}/v1/privilege/${uuid}`, {  
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -87,7 +88,7 @@ export const updatePrivilege = async (uuid: string, privilegeData: {description?
 }
 
 export const deletePrivilege = async (uuid: string) => {
-    const res = await fetch(`${BASE_URL}/privilege/${uuid}`, {
+    const res = await fetch(`${API_BASE}/v1/privilege/${uuid}`, {
         method: 'DELETE', 
         headers: {
             'Accept': 'application/json',

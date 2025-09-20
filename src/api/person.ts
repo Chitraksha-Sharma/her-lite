@@ -1,4 +1,5 @@
-const BASE_URL = "/curiomed/v1";
+// const BASE_URL = "/curiomed/v1";
+import { API_BASE } from "./apiBase";
 
 function getAuthHeaders() {
   const token = localStorage.getItem("authToken");
@@ -52,7 +53,7 @@ export async function createPerson(personData: {
       ];
     }
 
-    const res = await fetch(`${BASE_URL}/person`, {
+    const res = await fetch(`${API_BASE}/v1/person`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -80,7 +81,7 @@ export async function createPerson(personData: {
  */
 export async function searchPerson(query: string): Promise<PersonResponse> {
   try {
-    const res = await fetch(`${BASE_URL}/person/search?q=${encodeURIComponent(query)}`, {
+    const res = await fetch(`${API_BASE}/v1/person/search?q=${encodeURIComponent(query)}`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -107,7 +108,7 @@ export async function searchPerson(query: string): Promise<PersonResponse> {
  */
 export async function getPersonById(personUuid: string): Promise<PersonResponse> {
   try {
-    const res = await fetch(`${BASE_URL}/person/${personUuid}?v=fll`, {
+    const res = await fetch(`${API_BASE}/v1/person/${personUuid}?v=fll`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -134,7 +135,7 @@ export async function getPersonById(personUuid: string): Promise<PersonResponse>
  */
 export async function deletePerson(personUuid: string): Promise<PersonResponse> {
   try {
-    const res = await fetch(`${BASE_URL}/person/${personUuid}`, {
+    const res = await fetch(`${API_BASE}/v1/person/${personUuid}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -175,7 +176,7 @@ export async function updatePersonGenderAndBirthdate(
       dead: updateData.dead,
     };
 
-    const res = await fetch(`${BASE_URL}/person/${personUuid}`, {
+    const res = await fetch(`${API_BASE}/v1/person/${personUuid}`, {
       method: "POST", // or "PUT" — adjust based on backend
       headers: {
         "Content-Type": "application/json",
@@ -220,7 +221,7 @@ export async function updatePersonName(
     if (nameData.familyName) payload.familyName = nameData.familyName;
     if (nameData.preferred !== undefined) payload.preferred = nameData.preferred;
 
-    const res = await fetch(`${BASE_URL}/person/${personUuid}/name/${nameUuid}`, {
+    const res = await fetch(`${API_BASE}/v1/person/${personUuid}/name/${nameUuid}`, {
       method: "POST", // ✅ your backend requires POST
       headers: {
         "Content-Type": "application/json",
@@ -273,7 +274,7 @@ export async function updatePersonAddress(
     if (addressData.longitude) payload.longitude = addressData.longitude;
     if (addressData.preferred !== undefined) payload.preferred = addressData.preferred;
 
-    const res = await fetch(`${BASE_URL}/person/${personUuid}/address/${addressUuid}`, {
+    const res = await fetch(`${API_BASE}/v1/person/${personUuid}/address/${addressUuid}`, {
       method: "POST", // ✅ your backend requires POST
       headers: {
         "Content-Type": "application/json",

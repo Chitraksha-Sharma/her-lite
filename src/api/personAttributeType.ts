@@ -1,4 +1,5 @@
-const BASE_URL = "/curiomed/v1";
+// const BASE_URL = "/curiomed/v1";
+import { API_BASE } from "./apiBase";
 
 function getAuthHeaders() {
   const token = localStorage.getItem("authToken");
@@ -19,7 +20,7 @@ export interface PersonAttributeType {
 
 // 🔹 Get single attribute type by UUID
 export async function getAttributeType(uuid: string): Promise<PersonAttributeType> {
-  const res = await fetch(`${BASE_URL}/personattributetype/${uuid}`, {
+  const res = await fetch(`${API_BASE}/v1/personattributetype/${uuid}`, {
     method: "GET",
     headers: {
       Accept: "application/json",
@@ -36,7 +37,7 @@ export async function getAttributeType(uuid: string): Promise<PersonAttributeTyp
 
 // 🔹 Get all attribute types
 export async function getAllAttributeTypes(): Promise<PersonAttributeType[]> {
-  const res = await fetch(`${BASE_URL}/personattributetype`, {
+  const res = await fetch(`${API_BASE}/v1/personattributetype`, {
     method: "GET",
     headers: {
       Accept: "application/json",
@@ -65,7 +66,7 @@ export async function createAttributeType(attributeData: PersonAttributeType): P
     editPrivilege: attributeData.editPrivilege,
     // Note: do NOT send `retired` — backend rejects this property on create
   };
-  const res = await fetch(`${BASE_URL}/personattributetype`, {
+  const res = await fetch(`${API_BASE}/v1/personattributetype`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -84,7 +85,7 @@ export async function createAttributeType(attributeData: PersonAttributeType): P
 
 // 🔹 Update attribute type
 export async function updateAttributeType(uuid: string, attributeData: Partial<PersonAttributeType>): Promise<PersonAttributeType> {
-  const res = await fetch(`${BASE_URL}/personattributetype/${uuid}`, {
+  const res = await fetch(`${API_BASE}/v1/personattributetype/${uuid}`, {
     method: "POST", 
     headers: {
       "Content-Type": "application/json",
@@ -103,7 +104,7 @@ export async function updateAttributeType(uuid: string, attributeData: Partial<P
 
 // 🔹 Delete attribute type
 export async function deleteAttributeType(uuid: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/personattributetype/${uuid}`, {
+  const res = await fetch(`${API_BASE}/v1/personattributetype/${uuid}`, {
     method: "DELETE",
     headers: {
       Accept: "application/json",

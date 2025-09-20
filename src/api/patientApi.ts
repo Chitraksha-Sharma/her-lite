@@ -1,60 +1,7 @@
-
-  
-//   /**
-//    * Search patients across multiple safe fields by issuing multiple queries (client-side OR)
-//    * Only uses safe search parameters to avoid 400 responses.
-//    */
-//   export const searchPatients = async (query: string): Promise<Patient[]> => {
-//     if (!query || !query.trim()) return [];
-  
-//     const token = getSessionToken();
-//     const headers: Record<string, string> = {
-//       "Content-Type": "application/json",
-//       Accept: "application/fhir+json",
-//     };
-//     if (token) headers.Authorization = `Bearer ${token}`;
-  
-//     const safeFields = [
-//       "name", // searches name
-//       "birthdate",
-//       "address-city",
-//       "address-postalcode",
-//       "identifier",
-//       "_content", // server full text search (if supported)
-//     ];
-  
-//     const requests = safeFields.map((field) => {
-//       const url = `${BASE_URL}/v1/fhir/Patient?${field}=${encodeURIComponent(query)}&_count=20`;
-//       return fetch(url, { headers })
-//         .then((r) => (r.ok ? r.json() : null))
-//         .then((data) => {
-//           if (!data) return [];
-//           if (Array.isArray(data.patients) && data.patients.length > 0) {
-//             return data.patients.map((p: any) => mapToPatient(p));
-//           }
-//           if (Array.isArray(data.entry) && data.entry.length > 0) {
-//             return data.entry.map((e: any) => mapToPatient(e.resource ?? e));
-//           }
-//           return [];
-//         })
-//         .catch((e) => {
-//           console.warn("ignored search error for field", field, e);
-//           return [];
-//         });
-//     });
-  
-//     const results = await Promise.all(requests);
-//     const merged = results.flat();
-  
-//     // deduplicate by id
-//     const unique = Array.from(new Map(merged.map((p) => [p.id, p])).values());
-//     return unique;
-//   };
-
-
 import { format } from "date-fns";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+// const BASE_URL = import.meta.env.VITE_API_URL;
+import { API_BASE } from "./apiBase";
 
 export interface PatientFormData {
   firstName: string;
@@ -224,7 +171,7 @@ export const fetchPatients = async (): Promise<Patient[]> => {
   };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const url = `${BASE_URL}/v1/fhir/Patient?name=doe`;
+  const url = `${API_BASE}/v1/fhir/Patient?name=doe`;
 
   try {
     const res = await fetch(url, { headers });
@@ -258,7 +205,7 @@ export const fetchPatientById = async (
   }
 
   try {
-    const res = await fetch(`${BASE_URL}/v1/fhir/Patient/${patientId}`, {
+    const res = await fetch(`${API_BASE}/v1/fhir/Patient/${patientId}`, {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/fhir+json",
@@ -383,7 +330,7 @@ export const submitPatient = async (
       ],
     };
 
-    const response = await fetch(`${BASE_URL}/v1/fhir/Patient`, {
+    const response = await fetch(`${API_BASE}/v1/fhir/Patient`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -428,7 +375,7 @@ export const updatePatient = async (
       ...payload,
     };
 
-    const response = await fetch(`${BASE_URL}/v1/fhir/Patient/${patientId}`, {
+    const response = await fetch(`${API_BASE}/v1/fhir/Patient/${patientId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

@@ -1,5 +1,6 @@
 // src/api/user.ts
-const BASE_URL = "/curiomed/v1";
+// const BASE_URL = "/curiomed/v1";
+import { API_BASE } from "./apiBase";
 
 function getAuthHeaders() {
   const token = localStorage.getItem("authToken");
@@ -11,7 +12,7 @@ function getAuthHeaders() {
  */
 export async function getUsers() {
   try {
-    const res = await fetch(`${BASE_URL}/user`, {
+    const res = await fetch(`${API_BASE}/v1/user`, {
       method: "GET",
       headers: {
         "Accept": "application/json",
@@ -50,7 +51,7 @@ export async function getUser(uuid: string, options?: { forceReload?: boolean })
       (fetchOpts as any).cache = "no-store";
     }
 
-    const res = await fetch(`${BASE_URL}/user/${uuid}`, fetchOpts);
+    const res = await fetch(`${API_BASE}/v1/user/${uuid}`, fetchOpts);
     if (!res.ok) {
       return { success: false, error: `Failed to fetch user: ${res.status} ${res.statusText}` };
     }
@@ -81,7 +82,7 @@ export async function createUser(userData: {
       roles: userData.roles,
     };
 
-    const res = await fetch(`${BASE_URL}/user`, {
+    const res = await fetch(`${API_BASE}/v1/user`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -108,7 +109,7 @@ export async function createUser(userData: {
  */
 export async function deleteUser(uuid: string) {
   try {
-    const res = await fetch(`${BASE_URL}/user/${uuid}`, {
+    const res = await fetch(`${API_BASE}/v1/user/${uuid}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -145,7 +146,7 @@ export async function createRole(roleData: {
       privileges: roleData.privileges || [],
     };
 
-    const res = await fetch(`${BASE_URL}/role`, {
+    const res = await fetch(`${API_BASE}/v1/role`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -172,7 +173,7 @@ export async function createRole(roleData: {
  */
 export async function getRoles() {
   try {
-    const res = await fetch(`${BASE_URL}/role?v=full`, {
+    const res = await fetch(`${API_BASE}/v1/role?v=full`, {
       method: "GET",
       headers: {
         "Accept": "application/json",
