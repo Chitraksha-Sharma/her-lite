@@ -16,7 +16,7 @@ export async function apiRequest(
   };
 
   const config: RequestInit = {
-    credentials: "include",
+    mode: "cors",
     headers: {
       ...defaultHeaders,
       ...options.headers,
