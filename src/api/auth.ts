@@ -1,14 +1,13 @@
 // src/api/auth.ts
-import { API_BASE } from "./apiBase";
+import { apiRequest } from "./apiBase";
 
 /**
  * Login with username/password.
  */
 export async function loginApi(username: string, password: string) {
   try {
-    const response = await fetch(`${API_BASE}/v1/auth/login`, {
+    const response = await apiRequest("/v1/auth/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
 
@@ -35,9 +34,11 @@ export async function loginApi(username: string, password: string) {
  */
 export async function logoutApi(token: string) {
   try {
-    const response = await fetch(`${API_BASE}/v1/auth/logout`, {
+    const response = await apiRequest("/v1/auth/logout", {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { 
+        "Authorization": `Bearer ${token}`
+      },
     });
 
     if (!response.ok) throw new Error("Logout failed");
@@ -52,7 +53,7 @@ export async function logoutApi(token: string) {
  * Get current user profile
  */
 export async function getCurrentUser(token: string) {
-  const response = await fetch(`${API_BASE}/v1/auth/me`, {
+  const response = await apiRequest("/v1/auth/me", {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
   });
