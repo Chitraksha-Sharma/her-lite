@@ -11,25 +11,6 @@ export default defineConfig(({ mode }) => {
     server: {
       host: "::",
       port: Number(env.VITE_DEV_PORT) || 3000,
-      proxy: {
-        // Use environment variable for API proxy
-        [env.VITE_API_URL]: {
-          target: env.VITE_API_TARGET,
-          changeOrigin: true,
-          secure: false,
-          configure: (proxy, options) => {
-            proxy.on('error', (err, req, res) => {
-              console.log('Proxy error:', err);
-            });
-            proxy.on('proxyReq', (proxyReq, req, res) => {
-              console.log('Sending request to target:', req.method, req.url);
-            });
-            proxy.on('proxyRes', (proxyRes, req, res) => {
-              console.log('Received response from target:', proxyRes.statusCode, req.url);
-            });
-          },
-        },
-      },
     },
     plugins: [
       react(),
